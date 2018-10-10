@@ -70,7 +70,7 @@ public class WorldsTeleop extends OpMode
 
 
     boolean keepShooterSpinning = false;
-    double SHOOTER_REVERSE_SPEED = -0.3d;
+    double SHOOTER_REVERSE_SPEED = -0.6d;
     double SHOOTER_FORWARD_SPEED = 1.0d;
     double currentShooterSpeed = 0.0d;
 
@@ -93,10 +93,10 @@ public class WorldsTeleop extends OpMode
         // step (using the FTC Robot Controller app on the phone).
 
 
-        frontLeft  = hardwareMap.get(DcMotor.class, "motor1");
+        frontLeft  = hardwareMap.get(DcMotor.class, "motor4");
         frontRight = hardwareMap.get(DcMotor.class, "motor2");
         backLeft = hardwareMap.get(DcMotor.class, "motor3");
-        backRight = hardwareMap.get(DcMotor.class, "motor4");
+        backRight = hardwareMap.get(DcMotor.class, "motor1");
         frontRight.setDirection(DcMotor.Direction.REVERSE);
         backRight.setDirection(DcMotor.Direction.REVERSE);
 
@@ -184,8 +184,8 @@ public class WorldsTeleop extends OpMode
         frontLeft.setPower(reducePower(motorPowers[FRONT_LEFT]));
         backRight.setPower(reducePower(motorPowers[BACK_RIGHT]));
         backLeft.setPower(reducePower(motorPowers[BACK_LEFT]));
-/*
-        if (sillyCounter > 25) {
+
+       /* if (sillyCounter > 25) {
             sillyCounter = 0;
             getTelemetryUtil().addData("Start", "fR: " + frontRight.getPower() +
                     ", fL: " + frontLeft.getPower() +
@@ -196,7 +196,8 @@ public class WorldsTeleop extends OpMode
         else {
             ++sillyCounter;
         }
-*/
+        */
+
         // Forward/backward power is left_stick_y, but forward is -1.0 reading, so invert
 
 //        if (gamepad1.x) {
@@ -299,9 +300,8 @@ public class WorldsTeleop extends OpMode
         //frontLeft.setPower(Range.clip(pwr + x + z, -MAX_SPEED, MAX_SPEED));
         //backRight.setPower(Range.clip(pwr + x - z, -MAX_SPEED, MAX_SPEED));
         //backLeft.setPower(Range.clip(pwr - x + z, -MAX_SPEED, MAX_SPEED));
-   */
+        */
     }
-
 
     private static void normalizeCombinedPowers(double[] motorPowers) {
         double maxAbsPower = 0.0d;
@@ -320,12 +320,22 @@ public class WorldsTeleop extends OpMode
         }
     }
 
-
-
+    /**
+     * Returns a power that is reduced proportionally to the maximum speed, which would be
+     * no reduction if max speed is 1.0 (or basically 100%).
+     *
+     * @param input power to potentially be reduced.
+     * @return a power that is reduced proportionally to the maximum speed, which would be
+     * no reduction if max speed is 1.0 (or basically 100%).
+     */
     private static double reducePower(double input) {
         // return input;   // If no reduction desired
         return input * MAX_SPEED;
     }
+
+    /**
+     * Re-reads joystick values and assigns the state variables used for other computations.
+     */
     private void updateJoyStickValues() {
         y = gamepad1.left_stick_y;
         x = gamepad1.left_stick_x;
@@ -340,15 +350,31 @@ public class WorldsTeleop extends OpMode
         x = shapeInput(x);
         z = shapeInput(z);
     }
+
+    /**
+     * Returns 0.0 if within the deadzone range, otherwise the original value.
+     *
+     * @param input value to check.
+     * @return 0.0 if within the deadzone range, otherwise the original value.
+     */
     private static float adjustForDeadZone(float input) {
         float adjustedValue = input;
 
-        /*
-         * Code to run ONCE after the driver hits STOP
-         */
+        if (Math.abs(input) < DEAD_ZONE) {
+            adjustedValue = 0.0f;
+        }
 
         return adjustedValue;
     }
+
+    /**
+     * Returns the input value shaped by squaring and preserving sign.
+     *
+     * REVISIT: This is where using a more custom curve could be done instead.
+     *
+     * @param input value to shape.
+     * @return the input value shaped by squaring and preserving sign.
+     */
     private static float shapeInput(float input) {
         float shapedValue = 0.0f;
         if (input != 0.0f) {
