@@ -70,8 +70,8 @@ public class WorldsTeleop extends OpMode
 
 
     boolean keepShooterSpinning = false;
-    double SHOOTER_REVERSE_SPEED = -0.6d;
-    double SHOOTER_FORWARD_SPEED = 1.0d;
+    double SHOOTER_REVERSE_SPEED = 0.6d;
+    double SHOOTER_FORWARD_SPEED = -1.0d;
     double currentShooterSpeed = 0.0d;
 
     boolean flipped = false;
