@@ -15,6 +15,7 @@ public class Autonomous extends OpMode {
     private ElapsedTime elapsedTime;
     private Motor climber;
 
+    private Vuforia vuforia;
     private double CLIMBER_TIMEOUT = 5;
     @Override
     public void init() {
@@ -25,6 +26,7 @@ public class Autonomous extends OpMode {
         accelerometer = new Accelerometer(hardwareMap);
         stepCounter = new StepCounter(0);
         elapsedTime = new ElapsedTime();
+        vuforia = new Vuforia(hardwareMap);
 
     }
 
