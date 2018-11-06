@@ -45,6 +45,9 @@ public class Vuforia {
     private static final byte[] MY_VALUE = Base64.decode(VALUE, Base64.NO_WRAP);
     private static final String KEY = convert(MY_VALUE);
 
+    private GoldBlockPosition position;
+
+    private GoldSample goldThread;
 
     public Vuforia(HardwareMap map) {
         int cameraMonitorViewId = map.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", map.appContext.getPackageName());
@@ -64,11 +67,15 @@ public class Vuforia {
     public void sampleGoldBlockPosition(Telemetry telemetry) {
         try {
             VuforiaLocalizer.CloseableFrame frame = vuforia.getFrameQueue().take();
-            Thread t = new GoldSample(frame, telemetry);
-            t.start();
+            goldThread = new GoldSample(frame, telemetry);
+            goldThread.start();
         } catch (Exception e) {
             // guess
         }
+    }
+
+    public GoldBlockPosition getGoldBlockPosition() {
+        return goldThread.getGoldBlockPosition();
     }
 
 }
@@ -80,6 +87,13 @@ class GoldSample extends Thread {
     private Image rgb;
 
     private Telemetry telemetry;
+
+    private GoldBlockPosition position;
+
+    public GoldBlockPosition getGoldBlockPosition() {
+        return position;
+    }
+
     public GoldSample(VuforiaLocalizer.CloseableFrame frame, Telemetry telemetry) {
         this.telemetry = telemetry;
         long numImages = frame.getNumImages();
@@ -110,7 +124,7 @@ class GoldSample extends Thread {
 
                 double yellow = ((red + green)) / 500;
                // telemetry.addData("Yellow Value", yellow + "");
-                if (yellow > .6 && blue < 150) {
+                if (yellow > .8 && blue < 80){
                     amt += yellow;
                 }
 
@@ -149,95 +163,19 @@ class GoldSample extends Thread {
 
         yellowHalfTwo = getAmountOfYellow(halfOneTop) + getAmountOfYellow(halfTwoTop);
         yellowHalfOne = getAmountOfYellow(halfTwoBottom) + getAmountOfYellow(halfOneBottom);
+        telemetry.addData("Half one", yellowHalfOne);
+        telemetry.addData("Half two", yellowHalfTwo);
 
-        if (Math.abs(yellowHalfOne - yellowHalfTwo) < 2000) {
+        if (Math.abs(yellowHalfOne - yellowHalfTwo) < 100) {
             telemetry.addData("Block Found", "Off Screen - negligible difference of " + Math.abs(yellowHalfOne-yellowHalfTwo));
+            position = GoldBlockPosition.LEFT;
         } else if (yellowHalfOne > yellowHalfTwo) {
             telemetry.addData("Block Found", "Left");
+            position = GoldBlockPosition.CENTER;
         } else {
             telemetry.addData("Block Found", "Right");
+            position = GoldBlockPosition.RIGHT;
         }
-       // int[] pix = new int[rgb.getWidth() * rgb.getHeight()];
-
-        //bm.getPixels(pix, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
-
-       /* int halfOneY = bm.getHeight()/2;
-        int halfOneX = bm.getWidth()/2;
-
-        int numHalfOne = 0;
-        int numHalfTwo = 0;
-
-        int yellowHalfOne = 0;
-        int yellowHalfTwo = 0;
-
-        double threshold = .95;
-
-        /*
-        for (int y = 0; y < halfOneY; y++) {
-            for (int x = 0; x < bm.getWidth(); x++) {
-                int pixel = bm.getPixel(x, y);
-
-                int red, green, yellow;
-
-                red = Color.red(pixel);
-                green = Color.green(pixel);
-
-                yellow = (red + green) / 500;
-
-                if (yellow > threshold) {
-                    yellowHalfOne += yellow;
-                }
-
-                numHalfOne += 1;
-            }
-        }
-
-        for (int y = halfOneY; y < bm.getHeight(); y++) {
-            for (int x = 0; x < bm.getWidth(); x++) {
-                int pixel = bm.getPixel(x, y);
-
-                int red, green, yellow;
-
-                red = Color.red(pixel);
-                green = Color.green(pixel);
-
-                yellow = (red + green)/500;
-
-                if (yellow > threshold) {
-                    yellowHalfTwo += yellow;
-                }
-
-                numHalfTwo += 1;
-            }
-        }
-
-        //yellowHalfOne /= numHalfOne;
-        //yellowHalfTwo /= numHalfTwo;
-
-        telemetry.addData("Yellow H1", yellowHalfOne + "");
-        telemetry.addData("Yellow H2", yellowHalfTwo + "");
-        if (Math.abs(yellowHalfOne - yellowHalfTwo) < 10000) {
-            telemetry.addData("Gold Block Found", "Off Screen");
-        }
-        else if (yellowHalfOne > yellowHalfTwo) {
-            telemetry.addData("Gold Block Found", "Left");
-        } else {
-            telemetry.addData("Gold Block Found", "Right");
-        }
-        /*
-        for (int y = 0; y < bm.getHeight(); y++) {
-            for (int x = 0; x < bm.getWidth(); x++) {
-              int pixel = bm.getPixel(x, y);
-
-              int red, green, blue;
-              red = Color.red(pixel);
-              green = Color.green(pixel);
-              blue = Color.blue(pixel);
-
-
-             // telemetry.addData("Pixel (" + x + "," + y + ")", pixel + " (" + red + ", " + green + ", " + blue + ")");
-            }
-        }*/
 
         telemetry.addData("Pixel Analysis", "Done");
     }
