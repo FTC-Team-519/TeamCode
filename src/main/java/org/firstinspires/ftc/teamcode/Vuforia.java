@@ -95,16 +95,73 @@ class GoldSample extends Thread {
         assert(rgb != null);
     }
 
+    private double getAmountOfYellow(Bitmap bm) {
+        double amt = 0;
+
+        for(int y = 0; y < bm.getHeight(); y++) {
+            for (int x = 0; x < bm.getWidth(); x++) {
+                int pixel = bm.getPixel(x,y);
+
+                double red, green, blue;
+                red = Color.red(pixel);
+                green = Color.green(pixel);
+                blue = Color.blue(pixel);
+
+
+                double yellow = ((red + green)) / 500;
+               // telemetry.addData("Yellow Value", yellow + "");
+                if (yellow > .6 && blue < 150) {
+                    amt += yellow;
+                }
+
+            }
+        }
+
+        return amt;
+    }
     public void run() {
+
         Bitmap bm = Bitmap.createBitmap(rgb.getWidth(), rgb.getHeight(), Bitmap.Config.RGB_565);
 
         bm.copyPixelsFromBuffer(rgb.getPixels());
 
+
+        int boxWidth = bm.getWidth()/2;                      //    ||                   ||
+        int boxHeight = bm.getHeight()/2;
+
+        Bitmap halfOneTop = Bitmap.createBitmap(bm, 0, 0, boxWidth, boxHeight);
+
+        //top right part coordinate is (w/2, 0).
+        Bitmap halfTwoTop = Bitmap.createBitmap(bm, boxWidth, 0, boxWidth, boxHeight);
+
+        //bottom left part coordinate is (0, h/2).
+        Bitmap halfOneBottom = Bitmap.createBitmap(bm, 0, boxHeight, boxWidth, boxHeight);
+
+        //bottom right part coordinate is (w/2, h/2).
+        Bitmap halfTwoBottom = Bitmap.createBitmap(bm, boxWidth, boxHeight, boxWidth, boxHeight);
+        //Bitmap firstHalf = Bitmap.createBitmap(bm, 0, 0, bm.getWidth()/2, bm.getHeight());
+        //Bitmap secondHalf = Bitmap.createBitmap(bm, bm.getWidth()/2, 0, bm.getWidth()/2, )
+        //Bitmap topHalf2 = Bitmap.createBitmap(bm, bm.getWidth())
+
+
+        double yellowHalfOne = 0;
+        double yellowHalfTwo = 0;
+
+        yellowHalfTwo = getAmountOfYellow(halfOneTop) + getAmountOfYellow(halfTwoTop);
+        yellowHalfOne = getAmountOfYellow(halfTwoBottom) + getAmountOfYellow(halfOneBottom);
+
+        if (Math.abs(yellowHalfOne - yellowHalfTwo) < 2000) {
+            telemetry.addData("Block Found", "Off Screen - negligible difference of " + Math.abs(yellowHalfOne-yellowHalfTwo));
+        } else if (yellowHalfOne > yellowHalfTwo) {
+            telemetry.addData("Block Found", "Left");
+        } else {
+            telemetry.addData("Block Found", "Right");
+        }
        // int[] pix = new int[rgb.getWidth() * rgb.getHeight()];
 
         //bm.getPixels(pix, 0, bm.getWidth(), 0, 0, bm.getWidth(), bm.getHeight());
 
-        int halfOneY = bm.getHeight()/2;
+       /* int halfOneY = bm.getHeight()/2;
         int halfOneX = bm.getWidth()/2;
 
         int numHalfOne = 0;
@@ -113,10 +170,11 @@ class GoldSample extends Thread {
         int yellowHalfOne = 0;
         int yellowHalfTwo = 0;
 
-        double threshold = .9;
+        double threshold = .95;
 
+        /*
         for (int y = 0; y < halfOneY; y++) {
-            for (int x = 0; x < halfOneX; x++) {
+            for (int x = 0; x < bm.getWidth(); x++) {
                 int pixel = bm.getPixel(x, y);
 
                 int red, green, yellow;
@@ -135,7 +193,7 @@ class GoldSample extends Thread {
         }
 
         for (int y = halfOneY; y < bm.getHeight(); y++) {
-            for (int x = halfOneX; x < bm.getWidth(); x++) {
+            for (int x = 0; x < bm.getWidth(); x++) {
                 int pixel = bm.getPixel(x, y);
 
                 int red, green, yellow;
@@ -158,13 +216,13 @@ class GoldSample extends Thread {
 
         telemetry.addData("Yellow H1", yellowHalfOne + "");
         telemetry.addData("Yellow H2", yellowHalfTwo + "");
-        if (yellowHalfOne < 200 && yellowHalfTwo < 200) {
-            telemetry.addData("Ball Found", "Off Screen");
+        if (Math.abs(yellowHalfOne - yellowHalfTwo) < 10000) {
+            telemetry.addData("Gold Block Found", "Off Screen");
         }
         else if (yellowHalfOne > yellowHalfTwo) {
-            telemetry.addData("Ball Found", "Left");
+            telemetry.addData("Gold Block Found", "Left");
         } else {
-            telemetry.addData("Ball Found", "Right");
+            telemetry.addData("Gold Block Found", "Right");
         }
         /*
         for (int y = 0; y < bm.getHeight(); y++) {
