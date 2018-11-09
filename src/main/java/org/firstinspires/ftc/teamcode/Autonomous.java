@@ -9,6 +9,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Autonomous extends OpMode {
 
+    private Motor frontLeft;
+    private Motor frontRight;
+    private Motor backLeft;
+    private Motor backRight;
+
+    private Servo marker;
+    private Servo parker;
+
+    private MotorUtil motorUtil;
     private LimitSwitch limitSwitch;
     private Accelerometer accelerometer;
     private StepCounter stepCounter;
@@ -28,6 +37,18 @@ public class Autonomous extends OpMode {
         elapsedTime = new ElapsedTime();
         stepCounter = new StepCounter(0, elapsedTime);
         vuforia = new Vuforia(hardwareMap);
+        frontLeft = new Motor(hardwareMap, "motor1");
+        frontRight = new Motor(hardwareMap, "motor2");
+        backLeft = new Motor(hardwareMap, "motor3");
+        backRight = new Motor(hardwareMap, "motor4");
+
+        frontRight.getMotor().setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.getMotor().setDirection(DcMotorSimple.Direction.REVERSE);
+
+        motorUtil = new MotorUtil(frontRight, frontLeft, backRight, backLeft);
+
+        marker = new Servo(hardwareMap, "marker");
+        parker = new Servo(hardwareMap, "parker");
     }
 
     @Override

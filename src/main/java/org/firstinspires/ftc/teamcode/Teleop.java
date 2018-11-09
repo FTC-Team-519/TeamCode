@@ -4,7 +4,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name = "Teleop", group = "Iterative OpMode")
 public class Teleop extends OpMode {
@@ -12,21 +11,26 @@ public class Teleop extends OpMode {
     Gamepad driver;
     Gamepad gunner;
 
-    Motor frontLeft;
-    Motor frontRight;
-    Motor backLeft;
-    Motor backRight;
+    private Motor frontLeft;
+    private Motor frontRight;
+    private Motor backLeft;
+    private Motor backRight;
+
+    private Motor slider;
+    private Motor climber;
+    private Motor vertical;
+    private Motor collector;
+
+    private Servo parker;
+
+    private LimitSwitch limitSwitch;
 
     private float x;
     private float y;
     private float z;
-    private static final double MAX_SPEED = 1.0d;
 
-    private double[] motorPowers = new double[4];
-    private static final int FRONT_LEFT  = 0;
-    private static final int FRONT_RIGHT = 1;
-    private static final int BACK_LEFT   = 2;
-    private static final int BACK_RIGHT  = 3;
+    private float gunnerLeftStickY;
+    private boolean flipDriveDirection = false;
 
     private void updateJoyStickValues() {
         y = driver.left_stick_y;
@@ -38,6 +42,7 @@ public class Teleop extends OpMode {
         //x = adjustForDeadZone(x);
         //z = adjustForDeadZone(z);
 
+        gunnerLeftStickY = gunner.left_stick_y;
         y = shapeInput(y);
         x = shapeInput(x);
         z = shapeInput(z);
@@ -57,25 +62,13 @@ public class Teleop extends OpMode {
         return shapedValue;
     }
 
-    private static double reducePower(double input) {
-        // return input;   // If no reduction desired
-        return input * MAX_SPEED;
-    }
+    public float getVerticalMotorPower() {
+        float newY = -gunnerLeftStickY;
 
-    private static void normalizeCombinedPowers(double[] motorPowers) {
-        double maxAbsPower = 0.0d;
-
-        for (double motorPower : motorPowers) {
-            double tmpAbsPower = Math.abs(motorPower);
-            if (tmpAbsPower > maxAbsPower) {
-                maxAbsPower = tmpAbsPower;
-            }
-        }
-
-        if (maxAbsPower > 1.0d) {
-            for (int i = 0; i < motorPowers.length; ++i) {
-                motorPowers[i] = motorPowers[i] / maxAbsPower;
-            }
+        if (newY < 0) {
+            return newY * .5f;
+        } else {
+            return newY * 1.0f;
         }
     }
 
@@ -90,10 +83,18 @@ public class Teleop extends OpMode {
 
         frontRight.getMotor().setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.getMotor().setDirection(DcMotorSimple.Direction.REVERSE);
+
+        vertical = new Motor(hardwareMap, "vertical");
+        climber = new Motor(hardwareMap, "climber");
+        slider = new Motor(hardwareMap, "slider"); // encoder
+        collector = new Motor(hardwareMap, "collector");
+        parker = new Servo(hardwareMap, "parker");
+        limitSwitch = new LimitSwitch(hardwareMap);
     }
 
     @Override
     public void loop() {
+        // check if orange stick is moved down, if so move it up automatically
         updateJoyStickValues();
 
         if (Math.abs(driver.left_stick_x)>Math.abs(driver.left_stick_y)){
@@ -105,37 +106,69 @@ public class Teleop extends OpMode {
 
         double pwr = -y;
 
-        motorPowers[FRONT_RIGHT] = pwr - x - z;
-        motorPowers[FRONT_LEFT] = 1.25*(pwr + x + z);
-        motorPowers[BACK_RIGHT] = 1.25*(pwr + x - z);
-        motorPowers[BACK_LEFT] = pwr - x + z;
-        normalizeCombinedPowers(motorPowers);
+        double[] motorPowers = MotorUtil.UpdateMotorPowers(pwr, x, z);
 
-        frontRight.getMotor().setPower(reducePower(motorPowers[FRONT_RIGHT]));
-        frontLeft.getMotor().setPower(reducePower(motorPowers[FRONT_LEFT]));
-        backRight.getMotor().setPower(reducePower(motorPowers[BACK_RIGHT]));
-        backLeft.getMotor().setPower(reducePower(motorPowers[BACK_LEFT]));
+        frontRight.getMotor().setPower(motorPowers[MotorUtil.FRONT_RIGHT]);
+        frontLeft.getMotor().setPower(motorPowers[MotorUtil.FRONT_LEFT]);
+        backRight.getMotor().setPower(motorPowers[MotorUtil.BACK_RIGHT]);
+        backLeft.getMotor().setPower(motorPowers[MotorUtil.BACK_LEFT]);
+
+        /* Driver Button Scheme */
+        // forward, backward for driving on analog stick
+        // left, right strafe left, strafe right
+
+        // right joystick left,right turning
+        //x strafe left, b strafe right
+        //y sets inversion off, a is inverting
+
+        if (driver.x) {
+            // do strafe test
+        } else if (driver.b) {
+            // do strafe test
+        }
+
+        if (driver.y) {
+            flipDriveDirection = false;
+        } else if (driver.a) {
+            flipDriveDirection = true;
+        }
+
+        if (flipDriveDirection) {
+            x = -x;
+            y = -y;
+        }
+
+        /* Gunner Button Scheme */
+        // climber dpad up, dpad down for moving up and down
+        // vertical left analog stick up / down
+        // right analog stick slider up / down
+        // right trigger held down to spin collector
+        // left trigger spin reverse collector to spit out
+        // ------ignore limit switch hold down b and will ignore limit switch, lock where it is when b held down
+        if (gunner.dpad_up) {
+            climber.getMotor().setPower(.75);
+        } else if (gunner.dpad_down) {
+            climber.getMotor().setPower(-.75);
+        } else {
+            climber.getMotor().setPower(0.15); // stall
+        }
+
+        if (gunner.b) { // override stall
+            vertical.getMotor().setPower(.15); // stall
+        } else {
+            vertical.getMotor().setPower(getVerticalMotorPower());
+        }
+
+        if (gunner.right_bumper) {
+            collector.getMotor().setPower(.9);
+        } else if (gunner.left_bumper) {
+            collector.getMotor().setPower(-.9);
+        } else {
+            collector.getMotor().setPower(0);
+        }
 
 
 
-
-
-
-
-
-        // Setup a variable for each drive wheel to save power level for telemetry
-       /* double leftPower;
-        double rightPower;
-
-        // Choose to drive using either Tank Mode, or POV Mode
-        // Comment out the method that's not used.  The default below is POV.
-
-        // POV Mode uses left stick to go forward, and right stick to turn.
-        // - This uses basic math to combine motions and is easier to drive straight.
-        double drive = -gamepad1.left_stick_y;
-        double turn  =  gamepad1.right_stick_x;
-        leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
-        rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;*/
     }
 }
 
