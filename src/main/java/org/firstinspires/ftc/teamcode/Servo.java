@@ -6,10 +6,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 // descend, sample, drive and park
 // descend, sample, drive to safe zone and place team marker, (drive to crater? (park?))
 public class Servo {
-    private Servo servo;
+    private com.qualcomm.robotcore.hardware.Servo servo;
 
     public Servo(HardwareMap map, String name) {
-        servo = map.get(Servo.class, name);
+        servo = map.servo.get(name);
     }
 
     public void setPosition(double to) {

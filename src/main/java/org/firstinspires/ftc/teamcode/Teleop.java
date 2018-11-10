@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
@@ -21,6 +22,7 @@ public class Teleop extends OpMode {
     private Motor vertical;
     private Motor collector;
 
+    // front right, back right, backleft, frontleft
     private Servo parker;
 
     private LimitSwitch limitSwitch;
@@ -63,10 +65,10 @@ public class Teleop extends OpMode {
     }
 
     public float getVerticalMotorPower() {
-        float newY = -gunnerLeftStickY;
+        float newY = gunnerLeftStickY;
 
         if (newY < 0) {
-            return newY * .5f;
+            return newY * .8f;
         } else {
             return newY * 1.0f;
         }
@@ -90,6 +92,8 @@ public class Teleop extends OpMode {
         collector = new Motor(hardwareMap, "collector");
         parker = new Servo(hardwareMap, "parker");
         limitSwitch = new LimitSwitch(hardwareMap);
+
+        vertical.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
     @Override
@@ -121,6 +125,15 @@ public class Teleop extends OpMode {
         //x strafe left, b strafe right
         //y sets inversion off, a is inverting
 
+        telemetry.addData("LimitSwitch hit limit", limitSwitch.hasHitLimit() + ";");
+        if (driver.dpad_up && !limitSwitch.hasHitLimit()) {
+            climber.getMotor().setPower(1);
+        } else if (driver.dpad_down) {
+            climber.getMotor().setPower(1);
+        } else {
+            // climber.getMotor().setPower(0.15); // stall
+        }
+
         if (driver.x) {
             // do strafe test
         } else if (driver.b) {
@@ -145,13 +158,7 @@ public class Teleop extends OpMode {
         // right trigger held down to spin collector
         // left trigger spin reverse collector to spit out
         // ------ignore limit switch hold down b and will ignore limit switch, lock where it is when b held down
-        if (gunner.dpad_up) {
-            climber.getMotor().setPower(.75);
-        } else if (gunner.dpad_down) {
-            climber.getMotor().setPower(-.75);
-        } else {
-            climber.getMotor().setPower(0.15); // stall
-        }
+
 
         if (gunner.b) { // override stall
             vertical.getMotor().setPower(.15); // stall
@@ -160,9 +167,9 @@ public class Teleop extends OpMode {
         }
 
         if (gunner.right_bumper) {
-            collector.getMotor().setPower(.9);
-        } else if (gunner.left_bumper) {
             collector.getMotor().setPower(-.9);
+        } else if (gunner.left_bumper) {
+            collector.getMotor().setPower(.9);
         } else {
             collector.getMotor().setPower(0);
         }
