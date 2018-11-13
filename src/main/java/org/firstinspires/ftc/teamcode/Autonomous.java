@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous (name="Autonomous", group="Iterative Opmode")
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous", group = "Iterative Opmode")
 
 public class Autonomous extends OpMode {
 
@@ -25,14 +26,14 @@ public class Autonomous extends OpMode {
     private Motor climber;
 
     private Vuforia vuforia;
-    private double CLIMBER_TIMEOUT = 5;
+    private double CLIMBER_TIMEOUT = 12;
 
     @Override
     public void init() {
         limitSwitch = new LimitSwitch(hardwareMap);
         climber = new Motor(hardwareMap, "climber");
-        climber.getMotor().setDirection(DcMotorSimple.Direction.REVERSE);
-        climber.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // climber.getMotor().setDirection(DcMotorSimple.Direction.REVERSE);
+        //climber.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         accelerometer = new Accelerometer(hardwareMap);
         elapsedTime = new ElapsedTime();
         stepCounter = new StepCounter(0, elapsedTime);
@@ -53,7 +54,7 @@ public class Autonomous extends OpMode {
 
     @Override
     public void loop() {
-        switch(stepCounter.getStep()) {
+        switch (stepCounter.getStep()) {
             /* Case Layout
                 Steps 0-3: move down to floor until hit limit switch
                 Steps 4-?: Strafe off
@@ -61,20 +62,23 @@ public class Autonomous extends OpMode {
             case 0:
                 vuforia.sampleGoldBlockPosition(telemetry);
                 stepCounter.increment();
+                // FIXME: Take this out
+                stepCounter.set(5);
                 break;
             case 1:
-                climber.getMotor().setPower(.75);
+                climber.getMotor().setPower(1);
                 stepCounter.increment();
                 break;
             case 2:
-               if (limitSwitch.hasHitLimit() || elapsedTime.time() > CLIMBER_TIMEOUT) {
-                   climber.getMotor().setPower(0);
+                if (limitSwitch.hasHitLimit() || elapsedTime.time() > CLIMBER_TIMEOUT) {
+                    climber.getMotor().setPower(0);
+                }
 
-                   stepCounter.increment();
-               }
+                stepCounter.increment();
+
                 break;
             case 3:
-                telemetry.addData("Stopped Climber", "Due to " + (limitSwitch.hasHitLimit() ?  "limit switch" : "timeout"));
+                telemetry.addData("Stopped Climber", "Due to " + (limitSwitch.hasHitLimit() ? "limit switch" : "timeout"));
                 stepCounter.increment();
                 break;
             case 4:
@@ -83,18 +87,50 @@ public class Autonomous extends OpMode {
                 }
                 break;
             case 5:
-                GoldBlockPosition position = vuforia.getGoldBlockPosition();
-                if (position == GoldBlockPosition.LEFT) {
-                    // start strafing
-                } else if (position == GoldBlockPosition.RIGHT) {
-                    // start strafing
+
+                if (elapsedTime.time() < 2) {
+                    motorUtil.strafeLeft(.6);
                 } else {
-                    // start strafing
+                    stepCounter.increment();
                 }
-                stepCounter.increment();
                 break;
             case 6:
 
+                if (elapsedTime.time() < 2) {
+                    motorUtil.forward(.5);
+                } else {
+                    stepCounter.increment();
+                }
+                break;
+            case 7:
+                GoldBlockPosition position = vuforia.getGoldBlockPosition();
+                if (position == GoldBlockPosition.LEFT) {
+                    //start strafing
+                    motorUtil.turnLeft(.4, true);
+                    motorUtil.forward(.4);
+
+                } else if (position == GoldBlockPosition.RIGHT) {
+                    //start strafing
+                    motorUtil.turnRight(.4, true);
+                    motorUtil.forward(.4);
+                } else {
+                    motorUtil.turnRight(.4, true);
+                    motorUtil.forward(.4);
+                }
+                stepCounter.increment();
+                break;
+            case 8:
+                /*
+                    motorUtil.forward(double power);
+                    elapsedTime.time() > timeYouWantItToWaitUntil (in seconds)
+                    motorUtil.turnLeft(double power, boolean turnInPlace)
+
+                    stepCounter.increment();
+
+                    marker.getServo().setPosition();
+                    parker.getServo().setPosition();
+                 */
+                stepCounter.increment();
                 break;
 
         }
