@@ -32,6 +32,8 @@ public class Teleop extends OpMode {
     private float z;
 
     private float gunnerLeftStickY;
+    private float gunnerRightStickY;
+
     private boolean flipDriveDirection = false;
 
     private void updateJoyStickValues() {
@@ -45,6 +47,8 @@ public class Teleop extends OpMode {
         //z = adjustForDeadZone(z);
 
         gunnerLeftStickY = gunner.left_stick_y;
+        gunnerRightStickY = gunner.right_stick_y;
+
         y = shapeInput(y);
         x = shapeInput(x);
         z = shapeInput(z);
@@ -70,8 +74,24 @@ public class Teleop extends OpMode {
         if (newY < 0) {
             return newY * .8f;
         } else {
+
             return newY * 1.0f;
+       }
+    }
+
+    public float getSliderMotorPower() {
+        float newY = gunnerRightStickY;
+
+        if (newY < 0) {
+            return newY * .8f;
+        } else {
+            return newY*1f;
         }
+    }
+
+    @Override
+    public void start() {
+        slider.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override
@@ -94,6 +114,10 @@ public class Teleop extends OpMode {
         limitSwitch = new LimitSwitch(hardwareMap);
 
         vertical.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+       // climber.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        slider.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        slider.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     @Override
@@ -108,14 +132,33 @@ public class Teleop extends OpMode {
             x = 0;
         }
 
+        if (flipDriveDirection) {
+            x = -x;
+            y = -y;
+        }
+
         double pwr = -y;
 
         double[] motorPowers = MotorUtil.UpdateMotorPowers(pwr, x, z);
 
-        frontRight.getMotor().setPower(motorPowers[MotorUtil.FRONT_RIGHT]);
-        frontLeft.getMotor().setPower(motorPowers[MotorUtil.FRONT_LEFT]);
-        backRight.getMotor().setPower(motorPowers[MotorUtil.BACK_RIGHT]);
-        backLeft.getMotor().setPower(motorPowers[MotorUtil.BACK_LEFT]);
+        if (!driver.x && !driver.b) {
+            frontRight.getMotor().setPower(motorPowers[MotorUtil.FRONT_RIGHT]);
+            frontLeft.getMotor().setPower(motorPowers[MotorUtil.FRONT_LEFT]);
+            backRight.getMotor().setPower(motorPowers[MotorUtil.BACK_RIGHT]);
+            backLeft.getMotor().setPower(motorPowers[MotorUtil.BACK_LEFT]);
+        } else {
+            if (driver.x) {
+                frontLeft.getMotor().setPower(-1);
+                frontRight.getMotor().setPower(1);
+                backRight.getMotor().setPower(-1);
+                backLeft.getMotor().setPower(1);
+            } else {
+                frontLeft.getMotor().setPower(1);
+                frontRight.getMotor().setPower(-1);
+                backRight.getMotor().setPower(1);
+                backLeft.getMotor().setPower(-1);
+            }
+        }
 
         /* Driver Button Scheme */
         // forward, backward for driving on analog stick
@@ -129,15 +172,10 @@ public class Teleop extends OpMode {
         if (driver.dpad_up && !limitSwitch.hasHitLimit()) {
             climber.getMotor().setPower(1);
         } else if (driver.dpad_down) {
-            climber.getMotor().setPower(1);
+            climber.getMotor().setPower(-1);
         } else {
             // climber.getMotor().setPower(0.15); // stall
-        }
-
-        if (driver.x) {
-            // do strafe test
-        } else if (driver.b) {
-            // do strafe test
+            climber.getMotor().setPower(0);
         }
 
         if (driver.y) {
@@ -146,10 +184,6 @@ public class Teleop extends OpMode {
             flipDriveDirection = true;
         }
 
-        if (flipDriveDirection) {
-            x = -x;
-            y = -y;
-        }
 
         /* Gunner Button Scheme */
         // climber dpad up, dpad down for moving up and down
@@ -166,14 +200,23 @@ public class Teleop extends OpMode {
             vertical.getMotor().setPower(getVerticalMotorPower());
         }
 
-        if (gunner.right_bumper) {
+        if (gunner.right_bumper || gunner.right_trigger > 0) {
             collector.getMotor().setPower(-.9);
-        } else if (gunner.left_bumper) {
+        } else if (gunner.left_bumper || gunner.left_trigger > 0) {
             collector.getMotor().setPower(.9);
         } else {
             collector.getMotor().setPower(0);
         }
 
+
+        float sliderMotorPower = getSliderMotorPower();
+        if (sliderMotorPower > 0) {
+            if (slider.getMotor().getCurrentPosition() > -1250) {
+                slider.getMotor().setPower(sliderMotorPower);
+            }
+        } else {
+            slider.getMotor().setPower(sliderMotorPower);
+        }
 
 
     }
