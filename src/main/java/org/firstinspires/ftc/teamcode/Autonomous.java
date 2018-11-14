@@ -61,9 +61,9 @@ public class Autonomous extends OpMode {
              */
             case 0:
                 vuforia.sampleGoldBlockPosition(telemetry);
-                stepCounter.increment();
+               // stepCounter.increment();
                 // FIXME: Take this out
-                stepCounter.set(5);
+                stepCounter.set(4);
                 break;
             case 1:
                 climber.getMotor().setPower(1);
@@ -83,7 +83,9 @@ public class Autonomous extends OpMode {
                 break;
             case 4:
                 if (vuforia.getGoldBlockPosition() != null) {
-                    stepCounter.increment();
+                   // stepCounter.increment();
+                    //FIXME NEED TO TAKE THIS OUT
+                    stepCounter.set(6);
                 }
                 break;
             case 5:
@@ -96,7 +98,7 @@ public class Autonomous extends OpMode {
                 break;
             case 6:
 
-                if (elapsedTime.time() < 2) {
+                if (elapsedTime.time() < .6) {
                     motorUtil.forward(.5);
                 } else {
                     stepCounter.increment();
@@ -106,20 +108,36 @@ public class Autonomous extends OpMode {
                 GoldBlockPosition position = vuforia.getGoldBlockPosition();
                 if (position == GoldBlockPosition.LEFT) {
                     //start strafing
-                    motorUtil.turnLeft(.4, true);
-                    motorUtil.forward(.4);
-
+                    if (elapsedTime.time() > .5) {
+                        if (elapsedTime.time() > 3) {
+                            stepCounter.increment();
+                        } else {
+                            motorUtil.forward(.4);
+                        }
+                    } else {
+                        motorUtil.turnLeft(.6, true);
+                    }
                 } else if (position == GoldBlockPosition.RIGHT) {
                     //start strafing
-                    motorUtil.turnRight(.4, true);
-                    motorUtil.forward(.4);
+                    if (elapsedTime.time() > .5) {
+                        if (elapsedTime.time() > 3) {
+                            stepCounter.increment();
+                        } else {
+                            motorUtil.forward(.4);
+                        }
+                    } else {
+                        motorUtil.turnRight(.6, true);
+                    }
                 } else {
-                    motorUtil.turnRight(.4, true);
+                    //motorUtil.turnRight(.4, true);
                     motorUtil.forward(.4);
+                    if (elapsedTime.time() > 1.5) {
+                        stepCounter.increment();
+                    }
                 }
-                stepCounter.increment();
                 break;
             case 8:
+                motorUtil.stopMoving();
                 /*
                     motorUtil.forward(double power);
                     elapsedTime.time() > timeYouWantItToWaitUntil (in seconds)

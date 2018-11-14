@@ -35,7 +35,7 @@ import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
  */
 
 @TeleOp(name="Worlds", group="Iterative Opmode")
-//@Disabled
+@Disabled
 public class WorldsTeleop extends OpMode
 {
     // Declare OpMode members.

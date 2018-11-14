@@ -23,6 +23,7 @@ public class StepCounter {
 
     public void set(int to) {
         step = to;
+        elapsedTime.reset();
     }
 
     public int getStep() {

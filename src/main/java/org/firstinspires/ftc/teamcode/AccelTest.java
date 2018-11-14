@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
@@ -58,7 +59,7 @@ import java.util.Locale;
  */
 
 @TeleOp(name="AccelTest", group="Iterative Opmode")
-//@Disabled
+@Disabled
 public class AccelTest extends OpMode
 {
     // Declare OpMode members.

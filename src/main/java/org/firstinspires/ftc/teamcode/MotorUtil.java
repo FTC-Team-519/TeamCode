@@ -76,4 +76,25 @@ public class MotorUtil {
             frontRight.getMotor().setPower(-power);
         }
     }
+
+    public void strafeLeft(double power) {
+        frontLeft.getMotor().setPower(-.9*power);
+        frontRight.getMotor().setPower(.7*power);
+        backRight.getMotor().setPower(-.6*power);
+        backLeft.getMotor().setPower(1*power);
+    }
+
+    public void strafeRight(double power) {
+        frontLeft.getMotor().setPower(.9*power);
+        frontRight.getMotor().setPower(-.7*power);
+        backRight.getMotor().setPower(.6*power);
+        backLeft.getMotor().setPower(-1*power);
+    }
+
+    public void stopMoving() {
+        frontRight.getMotor().setPower(0);
+        frontLeft.getMotor().setPower(0);
+        backLeft.getMotor().setPower(0);
+        backRight.getMotor().setPower(0);
+    }
 }

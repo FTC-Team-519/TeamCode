@@ -12,6 +12,9 @@ public class Servo {
         servo = map.servo.get(name);
     }
 
+    public com.qualcomm.robotcore.hardware.Servo getServo() {
+        return servo;
+    }
     public void setPosition(double to) {
         servo.setPosition(to);
     }
