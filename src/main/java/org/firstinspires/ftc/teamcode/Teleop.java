@@ -23,6 +23,7 @@ public class Teleop extends OpMode {
     private Motor collector;
 
     // front right, back right, backleft, frontleft
+    private Servo marker;
     private Servo parker;
 
     private LimitSwitch limitSwitch;
@@ -110,8 +111,11 @@ public class Teleop extends OpMode {
         climber = new Motor(hardwareMap, "climber");
         slider = new Motor(hardwareMap, "slider"); // encoder
         collector = new Motor(hardwareMap, "collector");
+        marker = new Servo(hardwareMap, "marker");
         parker = new Servo(hardwareMap, "parker");
         limitSwitch = new LimitSwitch(hardwareMap);
+
+        marker.setPosition(0.5);
 
         vertical.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
        // climber.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -211,7 +215,7 @@ public class Teleop extends OpMode {
 
         float sliderMotorPower = getSliderMotorPower();
         if (sliderMotorPower > 0) {
-            if (slider.getMotor().getCurrentPosition() > -1250) {
+            if (slider.getMotor().getCurrentPosition() > 1325) {
                 slider.getMotor().setPower(sliderMotorPower);
             }
         } else {

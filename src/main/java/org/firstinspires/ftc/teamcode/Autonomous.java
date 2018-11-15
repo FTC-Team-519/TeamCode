@@ -50,6 +50,8 @@ public class Autonomous extends OpMode {
 
         marker = new Servo(hardwareMap, "marker");
         parker = new Servo(hardwareMap, "parker");
+
+        marker.setPosition(1);
     }
 
     @Override
@@ -109,8 +111,16 @@ public class Autonomous extends OpMode {
                 if (position == GoldBlockPosition.LEFT) {
                     //start strafing
                     if (elapsedTime.time() > .5) {
-                        if (elapsedTime.time() > 3) {
-                            stepCounter.increment();
+                        if (elapsedTime.time() > 2.6) {
+                            if (elapsedTime.time() > 4.2) {
+                                if (elapsedTime.time() > 4.8) {
+                                    stepCounter.increment();
+                                } else {
+                                    motorUtil.forward(.5);
+                                }
+                            } else {
+                                motorUtil.turnRight(.5, true);
+                            }
                         } else {
                             motorUtil.forward(.4);
                         }
@@ -120,7 +130,7 @@ public class Autonomous extends OpMode {
                 } else if (position == GoldBlockPosition.RIGHT) {
                     //start strafing
                     if (elapsedTime.time() > .5) {
-                        if (elapsedTime.time() > 3) {
+                        if (elapsedTime.time() > 4.1) {
                             stepCounter.increment();
                         } else {
                             motorUtil.forward(.4);
@@ -130,9 +140,19 @@ public class Autonomous extends OpMode {
                     }
                 } else {
                     //motorUtil.turnRight(.4, true);
-                    motorUtil.forward(.4);
-                    if (elapsedTime.time() > 1.5) {
-                        stepCounter.increment();
+                    //motorUtil.forward(.5);
+                    if (elapsedTime.time() > 3.2) {
+                        if (elapsedTime.time() > 4.1) {
+                            if (elapsedTime.time() > 4.4) {
+                               stepCounter.increment();
+                            } else {
+                                motorUtil.forward(.5);
+                            }
+                        } else {
+                            motorUtil.turnRight(.5, true);
+                        }
+                    } else {
+                        motorUtil.forward(.5);
                     }
                 }
                 break;
@@ -150,7 +170,12 @@ public class Autonomous extends OpMode {
                  */
                 stepCounter.increment();
                 break;
-
+            case 9:
+                if (marker.getPosition() < .3) {
+                    stepCounter.increment();
+                }
+                marker.setPosition(.2);
+                break;
         }
     }
 }
