@@ -112,8 +112,11 @@ class GoldSample extends Thread {
     private double getAmountOfYellow(Bitmap bm) {
         double amt = 0;
 
+        double ratio = 2.0d / 3.0d;
+        int range = (int) (ratio * (double)bm.getWidth());
+
         for(int y = 0; y < bm.getHeight(); y++) {
-            for (int x = 0; x < bm.getWidth(); x++) {
+            for (int x = range; x < bm.getWidth(); x++) {
                 int pixel = bm.getPixel(x,y);
 
                 double red, green, blue;
@@ -157,20 +160,22 @@ class GoldSample extends Thread {
         //Bitmap secondHalf = Bitmap.createBitmap(bm, bm.getWidth()/2, 0, bm.getWidth()/2, )
         //Bitmap topHalf2 = Bitmap.createBitmap(bm, bm.getWidth())
 
-
+        // bottom right = center, top right = right
         double yellowHalfOne = 0;
         double yellowHalfTwo = 0;
 
-        yellowHalfTwo = getAmountOfYellow(halfOneTop) + getAmountOfYellow(halfTwoTop);
-        yellowHalfOne = getAmountOfYellow(halfTwoBottom) + getAmountOfYellow(halfOneBottom);
+        yellowHalfTwo = getAmountOfYellow(halfTwoTop);
+        yellowHalfOne = getAmountOfYellow(halfTwoBottom);
+        //yellowHalfTwo = getAmountOfYellow(halfOneTop) + getAmountOfYellow(halfTwoTop);
+       // yellowHalfOne = getAmountOfYellow(halfTwoBottom) + getAmountOfYellow(halfOneBottom);
         telemetry.addData("Half one", yellowHalfOne);
         telemetry.addData("Half two", yellowHalfTwo);
 
         if (Math.abs(yellowHalfOne - yellowHalfTwo) < 100) {
-            telemetry.addData("Block Found", "Off Screen - negligible difference of " + Math.abs(yellowHalfOne-yellowHalfTwo));
+            telemetry.addData("Block Found", "Off Screen (left) - negligible difference of " + Math.abs(yellowHalfOne-yellowHalfTwo));
             position = GoldBlockPosition.LEFT;
         } else if (yellowHalfOne > yellowHalfTwo) {
-            telemetry.addData("Block Found", "Left");
+            telemetry.addData("Block Found", "Center");
             position = GoldBlockPosition.CENTER;
         } else {
             telemetry.addData("Block Found", "Right");

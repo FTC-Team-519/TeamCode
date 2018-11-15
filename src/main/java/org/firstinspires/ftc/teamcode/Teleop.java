@@ -72,8 +72,9 @@ public class Teleop extends OpMode {
     public float getVerticalMotorPower() {
         float newY = gunnerLeftStickY;
 
+       // telemetry.addData("Vertical Motor Value", newY + "");
         if (newY < 0) {
-            return newY * .8f;
+            return newY * .9f;
         } else {
 
             return newY * 1.0f;
@@ -93,6 +94,7 @@ public class Teleop extends OpMode {
     @Override
     public void start() {
         slider.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        vertical.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     @Override
@@ -122,6 +124,7 @@ public class Teleop extends OpMode {
         slider.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         slider.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vertical.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     @Override
@@ -197,11 +200,20 @@ public class Teleop extends OpMode {
         // left trigger spin reverse collector to spit out
         // ------ignore limit switch hold down b and will ignore limit switch, lock where it is when b held down
 
-
+        telemetry.addData("Vertical Encoder Value", vertical.getMotor().getCurrentPosition());
         if (gunner.b) { // override stall
             vertical.getMotor().setPower(.15); // stall
         } else {
-            vertical.getMotor().setPower(getVerticalMotorPower());
+            float verticalMotorPower = getVerticalMotorPower();
+            if (verticalMotorPower > 0) {
+                if (vertical.getMotor().getCurrentPosition() > -5) {
+                    vertical.getMotor().setPower(0);
+                } else {
+                    vertical.getMotor().setPower(verticalMotorPower);
+                }
+            } else {
+                vertical.getMotor().setPower(verticalMotorPower);
+            }
         }
 
         if (gunner.right_bumper || gunner.right_trigger > 0) {
@@ -214,12 +226,19 @@ public class Teleop extends OpMode {
 
 
         float sliderMotorPower = getSliderMotorPower();
+        telemetry.addData("Slider Encoder Value", slider.getMotor().getCurrentPosition() + "");
         if (sliderMotorPower > 0) {
-            if (slider.getMotor().getCurrentPosition() > 1325) {
+            if (slider.getMotor().getCurrentPosition() < 1270) {
                 slider.getMotor().setPower(sliderMotorPower);
+            } else {
+                slider.getMotor().setPower(0);
             }
         } else {
-            slider.getMotor().setPower(sliderMotorPower);
+            if (slider.getMotor().getCurrentPosition() > 0) {
+                slider.getMotor().setPower(sliderMotorPower);
+            } else {
+                slider.getMotor().setPower(0);
+            }
         }
 
 
