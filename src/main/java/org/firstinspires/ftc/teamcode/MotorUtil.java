@@ -79,8 +79,8 @@ public class MotorUtil {
 
     public void strafeLeft(double power) {
         frontLeft.getMotor().setPower(-.9*power);
-        frontRight.getMotor().setPower(.7*power);
-        backRight.getMotor().setPower(-.6*power);
+        frontRight.getMotor().setPower(.6*power);
+        backRight.getMotor().setPower(-.7*power);
         backLeft.getMotor().setPower(1*power);
     }
 

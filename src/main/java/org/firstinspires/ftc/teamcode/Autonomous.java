@@ -54,7 +54,7 @@ public class Autonomous extends OpMode {
         parker = new Servo(hardwareMap, "parker");
 
         marker.setPosition(1);
-
+        parker.setPosition(0.9);
         righty = new Servo(hardwareMap, "righty");
         lefty = new Servo(hardwareMap, "lefty");
 
@@ -71,9 +71,9 @@ public class Autonomous extends OpMode {
              */
             case 0:
                 vuforia.sampleGoldBlockPosition(telemetry);
-               // stepCounter.increment();
+                stepCounter.increment();
                 // FIXME: Take this out
-                stepCounter.set(4);
+              //  stepCounter.set(4);
                 break;
             case 1:
                 climber.getMotor().setPower(1);
@@ -82,9 +82,10 @@ public class Autonomous extends OpMode {
             case 2:
                 if (limitSwitch.hasHitLimit() || elapsedTime.time() > CLIMBER_TIMEOUT) {
                     climber.getMotor().setPower(0);
+                    stepCounter.increment();
+
                 }
 
-                stepCounter.increment();
 
                 break;
             case 3:
@@ -93,14 +94,14 @@ public class Autonomous extends OpMode {
                 break;
             case 4:
                 if (vuforia.getGoldBlockPosition() != null) {
-                   // stepCounter.increment();
+                    stepCounter.increment();
                     //FIXME NEED TO TAKE THIS OUT
-                    stepCounter.set(6);
+                  //  stepCounter.set(6);
                 }
                 break;
             case 5:
 
-                if (elapsedTime.time() < 2) {
+                if (elapsedTime.time() < 0.75) {
                     motorUtil.strafeLeft(.6);
                 } else {
                     stepCounter.increment();

@@ -17,6 +17,9 @@ public class Teleop extends OpMode {
     private Motor backLeft;
     private Motor backRight;
 
+    private Servo righty;
+    private Servo lefty;
+
     private Motor slider;
     private Motor climber;
     private Motor vertical;
@@ -70,7 +73,7 @@ public class Teleop extends OpMode {
     }
 
     public float getVerticalMotorPower() {
-        float newY = gunnerLeftStickY;
+        float newY = gunnerRightStickY;
 
        // telemetry.addData("Vertical Motor Value", newY + "");
         if (newY < 0) {
@@ -82,12 +85,12 @@ public class Teleop extends OpMode {
     }
 
     public float getSliderMotorPower() {
-        float newY = gunnerRightStickY;
+        float newY = gunnerLeftStickY;
 
         if (newY < 0) {
-            return newY * .8f;
+            return newY * -.9f;
         } else {
-            return newY*1f;
+            return newY * -1f;
         }
     }
 
@@ -115,9 +118,13 @@ public class Teleop extends OpMode {
         collector = new Motor(hardwareMap, "collector");
         marker = new Servo(hardwareMap, "marker");
         parker = new Servo(hardwareMap, "parker");
+        righty = new Servo(hardwareMap, "righty");
+        lefty = new Servo(hardwareMap, "lefty");
         limitSwitch = new LimitSwitch(hardwareMap);
-
+        righty.setPosition(0.5);
+        lefty.setPosition(0.5);
         marker.setPosition(0.5);
+        parker.setPosition(0.9);
 
         vertical.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
        // climber.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
