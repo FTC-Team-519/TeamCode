@@ -132,6 +132,7 @@ public class Teleop extends OpMode {
 
         slider.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         vertical.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        marker.setPosition(1);
     }
 
     @Override
@@ -198,6 +199,9 @@ public class Teleop extends OpMode {
             flipDriveDirection = true;
         }
 
+        if (driver.right_bumper) {
+            marker.setPosition(.2);
+        }
 
         /* Gunner Button Scheme */
         // climber dpad up, dpad down for moving up and down

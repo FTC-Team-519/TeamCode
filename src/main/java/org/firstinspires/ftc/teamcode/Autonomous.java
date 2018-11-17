@@ -122,6 +122,8 @@ public class Autonomous extends OpMode {
                     //start strafing
                     if (elapsedTime.time() > .5) {
                         if (elapsedTime.time() > 3.1) {
+                            lefty.setPosition(.7);
+                            righty.setPosition(.3);
                             if (elapsedTime.time() > 4.6) {
                                 if (elapsedTime.time() > 6.1) {
                                     stepCounter.increment();
