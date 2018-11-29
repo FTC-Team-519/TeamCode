@@ -109,9 +109,9 @@ public class Teleop extends OpMode {
         righty.setPosition(0.5);
         lefty.setPosition(0.5);
         marker.setPosition(0.5);
-        parker.setPosition(0.7);
+        parker.setPosition(0.69d);
         marker.setPosition(1);
-        parkerjr.setPosition(0);
+        parkerjr.setPosition(0.05d);
     }
 
     @Override
@@ -291,7 +291,7 @@ public class Teleop extends OpMode {
                 if (parkerjr.getPosition() >= .99) {
                     parkerMoving = false;
                 } else {
-                    parkerjr.setPosition(parkerjr.getPosition()+.009);
+                    parkerjr.setPosition(parkerjr.getPosition()+.029);
                 }
             } else {
                 parker.setPosition(parker.getPosition() - .009);
