@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "Teleop", group = "Iterative OpMode")
 public class Teleop extends OpMode {
@@ -20,14 +21,18 @@ public class Teleop extends OpMode {
     private Servo righty;
     private Servo lefty;
 
+    private boolean parkerMoving = false;
     private Motor slider;
     private Motor climber;
     private Motor vertical;
     private Motor collector;
 
+    private ElapsedTime parkerElapsedTime;
+    private ElapsedTime parkerJuniorElapsedTime;
     // front right, back right, backleft, frontleft
     private Servo marker;
     private Servo parker;
+    private Servo parkerjr;
 
     private LimitSwitch limitSwitch;
 
@@ -40,6 +45,8 @@ public class Teleop extends OpMode {
 
     private boolean flipDriveDirection = false;
 
+    private double parkerCurrentPosition;
+    private double parkerPositionIncrement = .01;
     private void updateJoyStickValues() {
         y = driver.left_stick_y;
         x = driver.left_stick_x;
@@ -87,10 +94,11 @@ public class Teleop extends OpMode {
     public float getSliderMotorPower() {
         float newY = gunnerLeftStickY;
 
+        telemetry.addData("Slider Motor Y Orig Value", newY + "");
         if (newY < 0) {
-            return newY * -.9f;
+            return newY * .9f;
         } else {
-            return newY * -1f;
+            return newY * 1f;
         }
     }
 
@@ -98,6 +106,12 @@ public class Teleop extends OpMode {
     public void start() {
         slider.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         vertical.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        righty.setPosition(0.5);
+        lefty.setPosition(0.5);
+        marker.setPosition(0.5);
+        parker.setPosition(0.7);
+        marker.setPosition(1);
+        parkerjr.setPosition(0);
     }
 
     @Override
@@ -121,10 +135,6 @@ public class Teleop extends OpMode {
         righty = new Servo(hardwareMap, "righty");
         lefty = new Servo(hardwareMap, "lefty");
         limitSwitch = new LimitSwitch(hardwareMap);
-        righty.setPosition(0.5);
-        lefty.setPosition(0.5);
-        marker.setPosition(0.5);
-        parker.setPosition(0.9);
 
         vertical.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
        // climber.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -132,7 +142,9 @@ public class Teleop extends OpMode {
 
         slider.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         vertical.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        marker.setPosition(1);
+        parkerElapsedTime = new ElapsedTime();
+        parkerJuniorElapsedTime = new ElapsedTime();
+        parkerjr = new Servo(hardwareMap, "parkerjr");
     }
 
     @Override
@@ -164,14 +176,14 @@ public class Teleop extends OpMode {
         } else {
             if (driver.x) {
                 frontLeft.getMotor().setPower(-1);
-                frontRight.getMotor().setPower(1);
+                frontRight.getMotor().setPower(0.95);//1
                 backRight.getMotor().setPower(-1);
-                backLeft.getMotor().setPower(1);
+                backLeft.getMotor().setPower(0.95);//1
             } else {
                 frontLeft.getMotor().setPower(1);
-                frontRight.getMotor().setPower(-1);
+                frontRight.getMotor().setPower(-0.95);//1
                 backRight.getMotor().setPower(1);
-                backLeft.getMotor().setPower(-1);
+                backLeft.getMotor().setPower(-0.95);//1
             }
         }
 
@@ -212,9 +224,6 @@ public class Teleop extends OpMode {
         // ------ignore limit switch hold down b and will ignore limit switch, lock where it is when b held down
 
         telemetry.addData("Vertical Encoder Value", vertical.getMotor().getCurrentPosition());
-        if (gunner.b) { // override stall
-            vertical.getMotor().setPower(.15); // stall
-        } else {
             float verticalMotorPower = getVerticalMotorPower();
             if (verticalMotorPower > 0) {
                 if (vertical.getMotor().getCurrentPosition() > -5) {
@@ -225,33 +234,83 @@ public class Teleop extends OpMode {
             } else {
                 vertical.getMotor().setPower(verticalMotorPower);
             }
-        }
 
         if (gunner.right_bumper || gunner.right_trigger > 0) {
             collector.getMotor().setPower(-.9);
         } else if (gunner.left_bumper || gunner.left_trigger > 0) {
-            collector.getMotor().setPower(.9);
+            collector.getMotor().setPower(.6);
         } else {
             collector.getMotor().setPower(0);
         }
 
 
         float sliderMotorPower = getSliderMotorPower();
+            telemetry.addData("Slider Motor Power After Done", sliderMotorPower +"");
         telemetry.addData("Slider Encoder Value", slider.getMotor().getCurrentPosition() + "");
+        if (gunner.a) {
+            slider.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            slider.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
         if (sliderMotorPower > 0) {
-            if (slider.getMotor().getCurrentPosition() < 1270) {
+            if (gunner.b) {
                 slider.getMotor().setPower(sliderMotorPower);
             } else {
-                slider.getMotor().setPower(0);
+                if (slider.getMotor().getCurrentPosition() < 0) {
+                    slider.getMotor().setPower(sliderMotorPower);
+                } else {
+                    slider.getMotor().setPower(0);
+                }
             }
         } else {
-            if (slider.getMotor().getCurrentPosition() > 0) {
+            if (gunner.b) {
                 slider.getMotor().setPower(sliderMotorPower);
             } else {
-                slider.getMotor().setPower(0);
+                if (slider.getMotor().getCurrentPosition() > -1270) {
+                    slider.getMotor().setPower(sliderMotorPower);
+                } else {
+                    slider.getMotor().setPower(0);
+                }
             }
         }
 
+        if (gunner.x) {
+            // Ensure that it's been held down for a second
+            if (parkerElapsedTime.time() >= 1) {
+                parkerElapsedTime.reset();
+                parkerMoving = true;
+                //parker.setPosition(0);
+                //parkerjr.setPosition(1);
+            }
+        } else {
+            parkerElapsedTime.reset();
+        }
+
+        if (parkerMoving) {
+            if (parker.getPosition() <= .01) {
+                if (parkerjr.getPosition() >= .99) {
+                    parkerMoving = false;
+                } else {
+                    parkerjr.setPosition(parkerjr.getPosition()+.009);
+                }
+            } else {
+                parker.setPosition(parker.getPosition() - .009);
+                //parkerJuniorElapsedTime.reset();
+            }
+        }
+
+        /*if (parkerMoving) {
+            if (parkerJuniorElapsedTime.time() > 1.5) {
+                parkerjr.setPosition(1);
+                if (parkerJuniorElapsedTime.time() > 2) {
+                    parkerMoving = false;
+                }
+            } else {
+                parkerjr.setPosition(.1);
+            }
+        } else {
+            parkerJuniorElapsedTime.reset();
+        }*/
 
     }
 }

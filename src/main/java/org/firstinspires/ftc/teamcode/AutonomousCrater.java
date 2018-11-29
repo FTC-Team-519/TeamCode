@@ -52,11 +52,13 @@ public class AutonomousCrater extends OpMode {
         marker = new Servo(hardwareMap, "marker");
         parker = new Servo(hardwareMap, "parker");
 
-        marker.setPosition(1);
-        parker.setPosition(0.9);
         righty = new Servo(hardwareMap, "righty");
         lefty = new Servo(hardwareMap, "lefty");
+    }
 
+    @Override
+    public void start() {
+        parker.setPosition(0.7);
         righty.setPosition(.5); // 0
         lefty.setPosition(.5); // 1
     }
@@ -101,7 +103,7 @@ public class AutonomousCrater extends OpMode {
             case 5:
 
                 if (elapsedTime.time() < 0.75) {
-                    motorUtil.strafeLeft(.6);
+                    motorUtil.strafeLeft(.65);
                 } else {
                     stepCounter.increment();
                 }
@@ -122,10 +124,10 @@ public class AutonomousCrater extends OpMode {
                     //start strafing
 
 
-                    if (elapsedTime.time() > 1.0) {
-                        if (elapsedTime.time() > 1.8) {
-                            if (elapsedTime.time() > 2.2) {
-                                if (elapsedTime.time() > 2.8) {
+                    if (elapsedTime.time() > 1.5) {
+                        if (elapsedTime.time() > 2.3) {
+                            if (elapsedTime.time() > 3.5) {
+                                if (elapsedTime.time() > 3.8) {
                                     stepCounter.increment();
                                 } else {
                                     motorUtil.forward(.5);

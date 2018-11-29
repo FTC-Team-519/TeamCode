@@ -73,7 +73,7 @@ public class Descend extends OpMode {
                 vuforia.sampleGoldBlockPosition(telemetry);
                 stepCounter.increment();
                 // FIXME: Take this out
-                //  stepCounter.set(4);
+                 // stepCounter.set(8);
                 break;
             case 1:
                 climber.getMotor().setPower(1);

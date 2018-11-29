@@ -54,10 +54,14 @@ public class Autonomous extends OpMode {
         parker = new Servo(hardwareMap, "parker");
 
         marker.setPosition(1);
-        parker.setPosition(0.9);
         righty = new Servo(hardwareMap, "righty");
         lefty = new Servo(hardwareMap, "lefty");
 
+    }
+
+    @Override
+    public void start() {
+        parker.setPosition(0.7);
         righty.setPosition(.5); // 0
         lefty.setPosition(.5); // 1
     }
@@ -101,18 +105,19 @@ public class Autonomous extends OpMode {
                 break;
             case 5:
 
-                if (elapsedTime.time() < 0.75) {
-                    motorUtil.strafeLeft(.6);
+                if (elapsedTime.time() < 0.75) { //.75
+                    motorUtil.strafeLeft(.7); //.6
                 } else {
                     stepCounter.increment();
                 }
                 break;
             case 6:
-                lefty.setPosition(0);
-                righty.setPosition(1);
+                lefty.setPosition(.3);
+                righty.setPosition(.7);
                 if (elapsedTime.time() < .6) {
                     motorUtil.forward(.5);
                 } else {
+
                     stepCounter.increment();
                 }
                 break;
@@ -122,8 +127,10 @@ public class Autonomous extends OpMode {
                     //start strafing
                     if (elapsedTime.time() > .5) {
                         if (elapsedTime.time() > 3.1) {
-                            lefty.setPosition(.7);
-                            righty.setPosition(.3);
+                           // lefty.setPosition(.7);
+                            //righty.setPosition(.3);
+                            lefty.setPosition(0);
+                            righty.setPosition(1);
                             if (elapsedTime.time() > 4.6) {
                                 if (elapsedTime.time() > 6.1) {
                                     stepCounter.increment();
@@ -143,6 +150,8 @@ public class Autonomous extends OpMode {
                     //start strafing
                     if (elapsedTime.time() > .525) {
                         if (elapsedTime.time() > 3.4) {
+                            lefty.setPosition(0);
+                            righty.setPosition(1);
                             if (elapsedTime.time() > 5.1) {
                                 if (elapsedTime.time() > 6.2) {
                                     if (elapsedTime.time() > 8) {
@@ -170,6 +179,8 @@ public class Autonomous extends OpMode {
                     //motorUtil.turnRight(.4, true);
                     //motorUtil.forward(.5);
                     if (elapsedTime.time() > 3.2) {
+                        lefty.setPosition(0);
+                        righty.setPosition(1);
                         if (elapsedTime.time() > 4.1) {
                             if (elapsedTime.time() > 4.25) {
                                stepCounter.increment();

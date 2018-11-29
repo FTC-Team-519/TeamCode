@@ -78,14 +78,14 @@ public class MotorUtil {
     }
 
     public void strafeLeft(double power) {
-        frontLeft.getMotor().setPower(-.9*power);
-        frontRight.getMotor().setPower(.6*power);
-        backRight.getMotor().setPower(-.7*power);
-        backLeft.getMotor().setPower(1*power);
+        frontLeft.getMotor().setPower(-.85*power); //-1
+        frontRight.getMotor().setPower(.82*power); // .85
+        backRight.getMotor().setPower(-.98*power); //-.975
+        backLeft.getMotor().setPower(0.92*power); // .725
     }
 
     public void strafeRight(double power) {
-        frontLeft.getMotor().setPower(.9*power);
+        frontLeft.getMotor().setPower(.9*power);//.9
         frontRight.getMotor().setPower(-.7*power);
         backRight.getMotor().setPower(.6*power);
         backLeft.getMotor().setPower(-1*power);
