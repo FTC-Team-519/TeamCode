@@ -105,7 +105,7 @@ public class Autonomous extends OpMode {
                 break;
             case 5:
 
-                if (elapsedTime.time() < 0.75) { //.75
+                if (elapsedTime.time() < 0.7) { //.75 usually
                     motorUtil.strafeLeft(.7); //.6
                 } else {
                     stepCounter.increment();
@@ -132,7 +132,7 @@ public class Autonomous extends OpMode {
                             lefty.setPosition(0);
                             righty.setPosition(1);
                             if (elapsedTime.time() > 4.6) {
-                                if (elapsedTime.time() > 6.1) {
+                                if (elapsedTime.time() > 6.4) {
                                     stepCounter.increment();
                                 } else {
                                     motorUtil.forward(.5);
@@ -148,14 +148,14 @@ public class Autonomous extends OpMode {
                     }
                 } else if (position == GoldBlockPosition.RIGHT) {
                     //start strafing
-                    if (elapsedTime.time() > .525) {
-                        if (elapsedTime.time() > 3.4) {
+                    if (elapsedTime.time() > .625+.15) {
+                        if (elapsedTime.time() > 4.4+.12) {
                             lefty.setPosition(0);
                             righty.setPosition(1);
-                            if (elapsedTime.time() > 5.1) {
-                                if (elapsedTime.time() > 6.2) {
-                                    if (elapsedTime.time() > 8) {
-                                        if (elapsedTime.time() > 8.3) {
+                            if (elapsedTime.time() > 6.1+.12) {
+                                if (elapsedTime.time() > 7.2+.12) {
+                                    if (elapsedTime.time() > 9+.12) {
+                                        if (elapsedTime.time() > 9.3+.05) {
                                             stepCounter.increment();
                                         } else {
                                             motorUtil.forward(.5);
@@ -215,7 +215,7 @@ public class Autonomous extends OpMode {
                 if (marker.getPosition() < .3) {
                     stepCounter.increment();
                 }
-                marker.setPosition(.2);
+                marker.setPosition(.6);
                 break;
         }
     }
