@@ -148,23 +148,39 @@ public class Autonomous extends OpMode {
                     }
                 } else if (position == GoldBlockPosition.RIGHT) {
                     //start strafing
-                    if (elapsedTime.time() > .625+.15) {
-                        if (elapsedTime.time() > 4.4+.12) {
+                    if (elapsedTime.time() > .68) { //.625+.15
+                        if (elapsedTime.time() > 3) { // was 3.5
                             lefty.setPosition(0);
                             righty.setPosition(1);
-                            if (elapsedTime.time() > 6.1+.12) {
-                                if (elapsedTime.time() > 7.2+.12) {
-                                    if (elapsedTime.time() > 9+.12) {
-                                        if (elapsedTime.time() > 9.3+.05) {
-                                            stepCounter.increment();
+                            if (elapsedTime.time() > 4.1) { // was 4.5
+                                if (elapsedTime.time() > 4.7) {
+                                    if (elapsedTime.time() > 5) { // was 5.1
+                                        if (elapsedTime.time() > 5.2) {
+                                            if (elapsedTime.time() > 5.5) { // was 5.4
+                                                if (elapsedTime.time() > 7) {
+                                                    if (elapsedTime.time() > 8.5) {
+                                                        if (elapsedTime.time() > 8.55) {
+                                                            stepCounter.increment();
+                                                        } else {
+                                                            motorUtil.forward(.5);
+                                                        }
+                                                    } else {
+                                                        motorUtil.turnRight(.5, true);
+                                                    }
+                                                } else {
+                                                    motorUtil.forward(.4);
+                                                }
+                                            } else {
+                                                motorUtil.turnLeft(.5, true);
+                                            }
                                         } else {
-                                            motorUtil.forward(.5);
+                                            motorUtil.forward(.4);
                                         }
                                     } else {
-                                        motorUtil.turnRight(.5, true);
+                                        motorUtil.turnLeft(.5, true);
                                     }
                                 } else {
-                                    motorUtil.forward(.5);
+                                    motorUtil.forward(.4);
                                 }
                             } else {
                                 motorUtil.turnLeft(.5, true);
