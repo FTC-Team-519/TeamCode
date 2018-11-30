@@ -47,6 +47,7 @@ public class Teleop extends OpMode {
 
     private double parkerCurrentPosition;
     private double parkerPositionIncrement = .01;
+
     private void updateJoyStickValues() {
         y = driver.left_stick_y;
         x = driver.left_stick_x;
@@ -70,8 +71,7 @@ public class Teleop extends OpMode {
         if (input != 0.0f) {
             if (input < 0.0f) {
                 shapedValue = input * -input;
-            }
-            else {
+            } else {
                 shapedValue = input * input;
             }
         }
@@ -82,13 +82,13 @@ public class Teleop extends OpMode {
     public float getVerticalMotorPower() {
         float newY = gunnerRightStickY;
 
-       // telemetry.addData("Vertical Motor Value", newY + "");
+        // telemetry.addData("Vertical Motor Value", newY + "");
         if (newY < 0) {
             return newY * .9f;
         } else {
 
             return newY * 1.0f;
-       }
+        }
     }
 
     public float getSliderMotorPower() {
@@ -137,7 +137,7 @@ public class Teleop extends OpMode {
         limitSwitch = new LimitSwitch(hardwareMap);
 
         vertical.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-       // climber.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        // climber.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         slider.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         slider.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -152,10 +152,9 @@ public class Teleop extends OpMode {
         // check if orange stick is moved down, if so move it up automatically
         updateJoyStickValues();
 
-        if (Math.abs(driver.left_stick_x)>Math.abs(driver.left_stick_y)){
+        if (Math.abs(driver.left_stick_x) > Math.abs(driver.left_stick_y)) {
             y = 0;
-        }
-        else if (Math.abs(driver.left_stick_y) > Math.abs(driver.left_stick_x)){
+        } else if (Math.abs(driver.left_stick_y) > Math.abs(driver.left_stick_x)) {
             x = 0;
         }
 
@@ -224,16 +223,16 @@ public class Teleop extends OpMode {
         // ------ignore limit switch hold down b and will ignore limit switch, lock where it is when b held down
 
         telemetry.addData("Vertical Encoder Value", vertical.getMotor().getCurrentPosition());
-            float verticalMotorPower = getVerticalMotorPower();
-            if (verticalMotorPower > 0) {
-                if (vertical.getMotor().getCurrentPosition() > -5) {
-                    vertical.getMotor().setPower(0);
-                } else {
-                    vertical.getMotor().setPower(verticalMotorPower);
-                }
+        float verticalMotorPower = getVerticalMotorPower();
+        if (verticalMotorPower > 0) {
+            if (vertical.getMotor().getCurrentPosition() > -5) {
+                vertical.getMotor().setPower(0);
             } else {
                 vertical.getMotor().setPower(verticalMotorPower);
             }
+        } else {
+            vertical.getMotor().setPower(verticalMotorPower);
+        }
 
         if (gunner.right_bumper || gunner.right_trigger > 0) {
             collector.getMotor().setPower(-.9);
@@ -245,7 +244,7 @@ public class Teleop extends OpMode {
 
 
         float sliderMotorPower = getSliderMotorPower();
-            telemetry.addData("Slider Motor Power After Done", sliderMotorPower +"");
+        telemetry.addData("Slider Motor Power After Done", sliderMotorPower + "");
         telemetry.addData("Slider Encoder Value", slider.getMotor().getCurrentPosition() + "");
         if (gunner.a) {
             slider.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -291,7 +290,7 @@ public class Teleop extends OpMode {
                 if (parkerjr.getPosition() >= .99) {
                     parkerMoving = false;
                 } else {
-                    parkerjr.setPosition(parkerjr.getPosition()+.029);
+                    parkerjr.setPosition(parkerjr.getPosition() + .029);
                 }
             } else {
                 parker.setPosition(parker.getPosition() - .009);
