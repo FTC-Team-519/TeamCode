@@ -207,7 +207,7 @@ public class AutonomousCrater extends OpMode {
                 break;
             case 10:
                 motorUtil.stopMoving();
-                //parker.setPosition(0.6);
+                parker.setPosition(0.2);
                 stepCounter.increment();
                 break;
             case 11:
