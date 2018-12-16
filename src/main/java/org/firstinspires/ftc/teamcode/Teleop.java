@@ -60,7 +60,7 @@ public class Teleop extends OpMode {
         //x = adjustForDeadZone(x);
         //z = adjustForDeadZone(z);
 
-        gunnerLeftStickY = gunner.left_stick_y;
+        gunnerLeftStickY = -gunner.left_stick_y;  // NOTE: Switch if spools inverted
         gunnerRightStickY = gunner.right_stick_y;
 
         y = shapeInput(y);
@@ -213,7 +213,7 @@ public class Teleop extends OpMode {
         }
 
         if (driver.right_bumper) {
-            marker.setPosition(.2);
+            marker.setPosition(.6);
         }
 
         /* Gunner Button Scheme */
@@ -259,7 +259,7 @@ public class Teleop extends OpMode {
             if (gunner.b) {
                 slider.getMotor().setPower(sliderMotorPower);
             } else {
-                if (slider.getMotor().getCurrentPosition() < 0) {
+                if (slider.getMotor().getCurrentPosition() < 1270) {
                     slider.getMotor().setPower(sliderMotorPower);
                 } else {
                     slider.getMotor().setPower(0);
@@ -269,7 +269,7 @@ public class Teleop extends OpMode {
             if (gunner.b) {
                 slider.getMotor().setPower(sliderMotorPower);
             } else {
-                if (slider.getMotor().getCurrentPosition() > -1270) {
+                if (slider.getMotor().getCurrentPosition() > 0) {
                     slider.getMotor().setPower(sliderMotorPower);
                 } else {
                     slider.getMotor().setPower(0);

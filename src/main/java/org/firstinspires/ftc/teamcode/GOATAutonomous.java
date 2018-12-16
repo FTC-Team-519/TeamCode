@@ -6,19 +6,29 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "Autonomous", group = "Iterative Opmode")
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name = "GOATAutonomous", group = "Iterative Opmode")
 
-public class Autonomous extends OpMode {
+public class GOATAutonomous extends OpMode {
 
     private Motor frontLeft;
     private Motor frontRight;
     private Motor backLeft;
     private Motor backRight;
 
+
+    private ElapsedTime parkerElapsedTime;
+    private ElapsedTime parkerJuniorElapsedTime;
+
     private Servo marker;
     private Servo parker;
     private Servo righty;
     private Servo lefty;
+    private Servo parkerjr;
+
+
+    private boolean parkerMovingOut = false;
+    private boolean parkerMovingIn = false;
+
 
     private MotorUtil motorUtil;
     private LimitSwitch limitSwitch;
@@ -77,7 +87,7 @@ public class Autonomous extends OpMode {
                 vuforia.sampleGoldBlockPosition(telemetry);
                 stepCounter.increment();
                 // FIXME: Take this out
-              //  stepCounter.set(4);
+                //  stepCounter.set(4);
                 break;
             case 1:
                 climber.getMotor().setPower(1);
@@ -100,12 +110,12 @@ public class Autonomous extends OpMode {
                 if (vuforia.getGoldBlockPosition() != null) {
                     stepCounter.increment();
                     //FIXME NEED TO TAKE THIS OUT
-                  //  stepCounter.set(6);
+                    //  stepCounter.set(6);
                 }
                 break;
             case 5:
 
-                if (elapsedTime.time() < 0.5) { //.75 usually  // was 0.7
+                if (elapsedTime.time() < 0.5) { //.75 usually
                     motorUtil.strafeLeft(.7); //.6
                 } else {
                     stepCounter.increment();
@@ -114,7 +124,7 @@ public class Autonomous extends OpMode {
             case 6:
                 lefty.setPosition(.3);
                 righty.setPosition(.7);
-                if (elapsedTime.time() < .6) {
+                if (elapsedTime.time() < .4) {
                     motorUtil.forward(.5);
                 } else {
 
@@ -127,7 +137,7 @@ public class Autonomous extends OpMode {
                     //start strafing
                     if (elapsedTime.time() > .5) {
                         if (elapsedTime.time() > 3.1) {
-                           // lefty.setPosition(.7);
+                            // lefty.setPosition(.7);
                             //righty.setPosition(.3);
                             lefty.setPosition(0);
                             righty.setPosition(1);
@@ -195,11 +205,11 @@ public class Autonomous extends OpMode {
                     //motorUtil.turnRight(.4, true);
                     //motorUtil.forward(.5);
                     if (elapsedTime.time() > 3.2) {
-                        lefty.setPosition(0);
-                        righty.setPosition(1);
+                        //lefty.setPosition(0);
+                        //righty.setPosition(1);
                         if (elapsedTime.time() > 4.1) {
                             if (elapsedTime.time() > 4.25) {
-                               stepCounter.increment();
+                                stepCounter.increment();
                             } else {
                                 motorUtil.forward(.5);
                             }
@@ -211,10 +221,10 @@ public class Autonomous extends OpMode {
                     }
                 }
                 break;
+
             case 8:
                 motorUtil.stopMoving();
-                lefty.setPosition(.5);
-                righty.setPosition(.5);
+
                 /*
                     motorUtil.forward(double power);
                     elapsedTime.time() > timeYouWantItToWaitUntil (in seconds)
@@ -232,7 +242,71 @@ public class Autonomous extends OpMode {
                     stepCounter.increment();
                 }
                 marker.setPosition(.6);
+                stepCounter.increment();
                 break;
+            case 10:
+                lefty.setPosition(0.5);
+                righty.setPosition(0.5);
+                if (elapsedTime.time() > 1.5) {
+                  //  lefty.setPosition(0.3);
+                    //righty.setPosition(0.7);
+                    if (elapsedTime.time() > 2.0) {
+
+                            stepCounter.increment();
+                    } else {
+                        motorUtil.forward(.5);
+                    }
+                } else {
+                    motorUtil.turnRight(.5, true);
+                }
+
+        break;
+
+            case 11:
+                    // Ensure that it's been held down for a second
+                    if (parkerElapsedTime.time() >= 1) {
+                        parkerElapsedTime.reset();
+                        if (parkerjr == null) {
+                            parkerjr = new Servo(hardwareMap, "parkerjr");
+                        }
+
+                        parkerMovingOut = true;
+                        //parker.setPosition(0);
+                        //parkerjr.setPosition(1);
+                    }
+
+
+                if (parkerMovingOut) {
+                    if (parker.getPosition() <= .01) {
+                        if (parkerjr.getPosition() >= .99) {
+                            telemetry.addData("->", "ParkerMovingOut finished.");
+                            parkerMovingOut = false; // parker jr ends at .99
+                        } else {
+                            telemetry.addData("ParkerJR position", parkerjr.getPosition());
+                            parkerjr.setPosition(parkerjr.getPosition() + .029);
+                        }
+                    } else {
+                        parker.setPosition(parker.getPosition() - .009); // parker ends at .01, ends at
+                        telemetry.addData("->", "Parker position", parker.getPosition() + "");
+                        //parkerJuniorElapsedTime.reset();
+                    }
+                } else if (parkerMovingIn) {
+                    if (parkerjr.getPosition() <= .01) {
+                        if (parker.getPosition() >= .69) {
+                            telemetry.addData("<-", "ParkerMovingIn finished.");
+                            parkerMovingIn = false;
+                        } else {
+                            parker.setPosition(parker.getPosition() + .009);
+                        }
+                    } else {
+                        parkerjr.setPosition(parker.getPosition() - .029);
+                    }
+                }
+
+                telemetry.update();
+                    stepCounter.increment();
+                    break;
         }
+
     }
 }

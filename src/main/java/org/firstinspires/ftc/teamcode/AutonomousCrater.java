@@ -102,7 +102,7 @@ public class AutonomousCrater extends OpMode {
                 break;
             case 5:
 
-                if (elapsedTime.time() < 0.7) {
+                if (elapsedTime.time() < 0.5) { //.7
                     motorUtil.strafeLeft(.7);
                 } else {
                     stepCounter.increment();
@@ -127,7 +127,7 @@ public class AutonomousCrater extends OpMode {
                     if (elapsedTime.time() > 1.5) {
                         if (elapsedTime.time() > 2.3) {
                             if (elapsedTime.time() > 3.5) {
-                                if (elapsedTime.time() > 3.8) {
+                                if (elapsedTime.time() > 4.15) {
                                     stepCounter.increment();
                                 } else {
                                     motorUtil.forward(.5);
