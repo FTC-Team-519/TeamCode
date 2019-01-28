@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.content.Context;
+
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import java.io.FileOutputStream;
 
 @TeleOp(name = "Teleop", group = "Iterative OpMode")
 public class Teleop extends OpMode {
@@ -49,6 +53,10 @@ public class Teleop extends OpMode {
 
     private double parkerCurrentPosition;
     private double parkerPositionIncrement = .01;
+
+    private boolean IS_RECORDING_ENABLED = true; // todo: TURN OFF WHEN WE NEED TO.
+    private FileOutputStream outputStream;
+    private BlackBox.Recorder recorder;
 
     private void updateJoyStickValues() {
         y = driver.left_stick_y;
@@ -106,6 +114,7 @@ public class Teleop extends OpMode {
 
     @Override
     public void start() {
+        super.start();
         slider.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         vertical.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         righty.setPosition(0.5);
@@ -114,6 +123,16 @@ public class Teleop extends OpMode {
         parker.setPosition(0.69d);
         marker.setPosition(1);
          //parkerjr.setPosition(0.05d);
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        try {
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -146,19 +165,58 @@ public class Teleop extends OpMode {
         vertical.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         parkerElapsedTime = new ElapsedTime();
         parkerJuniorElapsedTime = new ElapsedTime();
+
+        if (IS_RECORDING_ENABLED) {
+            // Attempt to initialize
+            try {
+                // Open a file named "recordedTeleop" in the app's folder.
+                outputStream = hardwareMap.appContext.openFileOutput("recordedTeleop",
+                        Context.MODE_PRIVATE);
+                // Setup a hardware recorder.
+                recorder = new BlackBox.Recorder(hardwareMap, outputStream);
+            } catch (Exception e) {
+                e.printStackTrace();
+                requestOpModeStop();
+            }
+        }
         //parkerjr = new Servo(hardwareMap, "parkerjr");
     }
 
+    private boolean wantsToRecord = false;
+    private ElapsedTime recordTimer = new ElapsedTime();
+    private ElapsedTime frameTimer = new ElapsedTime();
     @Override
     public void loop() {
         // check if orange stick is moved down, if so move it up automatically
         updateJoyStickValues();
 
-        if (Math.abs(driver.left_stick_x) > Math.abs(driver.left_stick_y)) {
+
+        if (driver.start && frameTimer.time() > 1) {
+            frameTimer.reset();
+            recordTimer.reset();
+            wantsToRecord = !wantsToRecord;
+        }
+
+        telemetry.addData("Recording", wantsToRecord + "");
+        if (IS_RECORDING_ENABLED && wantsToRecord) {
+            try {
+                double t = recordTimer.time();
+                recorder.recordDevice("motor1", t);
+                recorder.recordDevice("motor2", t);
+                recorder.recordDevice("motor3", t);
+                recorder.recordDevice("motor4", t);
+                telemetry.addData("Recording time", t + "");
+            } catch (Exception e) {
+                e.printStackTrace();
+                requestOpModeStop();
+            }
+        }
+
+       /* if (Math.abs(driver.left_stick_x) > Math.abs(driver.left_stick_y)) {
             y = 0;
         } else if (Math.abs(driver.left_stick_y) > Math.abs(driver.left_stick_x)) {
             x = 0;
-        }
+        }*/
 
         if (flipDriveDirection) {
             x = -x;
@@ -255,7 +313,7 @@ public class Teleop extends OpMode {
             slider.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
 
-        if (sliderMotorPower > 0) {
+        if (sliderMotorPower < 0) {
             if (gunner.b) {
                 slider.getMotor().setPower(sliderMotorPower);
             } else {
