@@ -24,6 +24,7 @@ public class Teleop extends OpMode {
 
     private Servo righty;
     private Servo lefty;
+    private Servo scorer;
 
     private boolean parkerMovingOut = false;
     private boolean parkerMovingIn = false;
@@ -53,6 +54,7 @@ public class Teleop extends OpMode {
 
     private double parkerCurrentPosition;
     private double parkerPositionIncrement = .01;
+    private double scorerValue = 0.1;
 
     private boolean IS_RECORDING_ENABLED = true; // todo: TURN OFF WHEN WE NEED TO.
     private FileOutputStream outputStream;
@@ -122,7 +124,7 @@ public class Teleop extends OpMode {
         marker.setPosition(0.5);
         parker.setPosition(0.69d);
         marker.setPosition(1);
-         //parkerjr.setPosition(0.05d);
+        //parkerjr.setPosition(0.05d);
     }
 
     @Override
@@ -146,7 +148,6 @@ public class Teleop extends OpMode {
 
         frontRight.getMotor().setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.getMotor().setDirection(DcMotorSimple.Direction.REVERSE);
-
         vertical = new Motor(hardwareMap, "vertical");
         climber = new Motor(hardwareMap, "climber");
         slider = new Motor(hardwareMap, "slider"); // encoder
@@ -155,6 +156,7 @@ public class Teleop extends OpMode {
         parker = new Servo(hardwareMap, "parker");
         righty = new Servo(hardwareMap, "righty");
         lefty = new Servo(hardwareMap, "lefty");
+        scorer = new Servo(hardwareMap, "scorer");
         limitSwitch = new LimitSwitch(hardwareMap);
 
         vertical.getMotor().setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -185,6 +187,7 @@ public class Teleop extends OpMode {
     private boolean wantsToRecord = false;
     private ElapsedTime recordTimer = new ElapsedTime();
     private ElapsedTime frameTimer = new ElapsedTime();
+
     @Override
     public void loop() {
         // check if orange stick is moved down, if so move it up automatically
@@ -274,6 +277,11 @@ public class Teleop extends OpMode {
             marker.setPosition(.6);
         }
 
+
+
+
+
+
         /* Gunner Button Scheme */
         // climber dpad up, dpad down for moving up and down
         // vertical left analog stick up / down
@@ -293,16 +301,23 @@ public class Teleop extends OpMode {
         } else {
             vertical.getMotor().setPower(verticalMotorPower);
         }
-        if (gunner.right_trigger > 0 && gunner.right_bumper) {
-            collector.getMotor().setPower(-0.9);
-        } else if (gunner.left_trigger > 0 && gunner.left_bumper) {
-            collector.getMotor().setPower(0.9);
-        } else if (gunner.right_bumper || gunner.right_trigger > 0) {
-            collector.getMotor().setPower(-.6);
+
+        if (gunner.right_bumper || gunner.right_trigger > 0) {
+            scorer.getServo().setPosition(1.0);
         } else if (gunner.left_bumper || gunner.left_trigger > 0) {
-            collector.getMotor().setPower(.6);
+            scorer.getServo().setPosition(0.0);
         } else {
-            collector.getMotor().setPower(0);
+            scorer.getServo().setPosition(0.5);
+        }
+
+        if (gunner.dpad_up) {
+            collector.getMotor().setPower(0.9);
+        } else if (gunner.dpad_down) {
+            collector.getMotor().setPower(-0.9);
+        } else if (gunner.dpad_left) {
+            collector.getMotor().setPower(-.6);
+        } else if (gunner.dpad_right) {
+            collector.getMotor().setPower(0.6);
         }
 
         float sliderMotorPower = getSliderMotorPower();
@@ -335,57 +350,70 @@ public class Teleop extends OpMode {
             }
         }
 
-        if (gunner.x) {
-            // Ensure that it's been held down for a second
-            if (parkerElapsedTime.time() >= 1) {
-                parkerElapsedTime.reset();
-                if (parkerjr == null) {
-                    parkerjr = new Servo(hardwareMap, "parkerjr");
-                }
-
-                parkerMovingOut = true;
-                //parker.setPosition(0);
-                //parkerjr.setPosition(1);
+        if (gunner.y) { //reset horizontal lift back to original position
+            if (slider.getMotor().getCurrentPosition() > 0) {
+                slider.getMotor().setPower(-0.3);
+            } else if (slider.getMotor().getCurrentPosition() < 0) {
+                slider.getMotor().setPower(0.3);
             }
-        } else if (gunner.y) {
-            if (parkerElapsedTime.time() >= 1) {
-                if (parkerjr == null) {} else {
-                    parkerMovingIn = true;
+
+            if (gunner.x) { //stall vertical
+                vertical.getMotor().setPower(0.3);
+            }
+    /*
+            if (gunner.x) {
+                // Ensure that it's been held down for a second
+                if (parkerElapsedTime.time() >= 1) {
                     parkerElapsedTime.reset();
-                }
-            }
-        } else {
-            parkerElapsedTime.reset();
-        }
+                    if (parkerjr == null) {
+                        parkerjr = new Servo(hardwareMap, "parkerjr");
+                    }
 
-        if (parkerMovingOut) {
-            if (parker.getPosition() <= .01) {
-                if (parkerjr.getPosition() >= .99) {
-                    telemetry.addData("->", "ParkerMovingOut finished.");
-                    parkerMovingOut = false; // parker jr ends at .99
-                } else {
-                    telemetry.addData("ParkerJR position", parkerjr.getPosition());
-                    parkerjr.setPosition(parkerjr.getPosition() + .029);
+                    parkerMovingOut = true;
+                    //parker.setPosition(0);
+                    //parkerjr.setPosition(1);
+                }
+            } else if (gunner.y) {
+                if (parkerElapsedTime.time() >= 1) {
+                    if (parkerjr == null) {
+                    } else {
+                        parkerMovingIn = true;
+                        parkerElapsedTime.reset();
+                    }
                 }
             } else {
-                parker.setPosition(parker.getPosition() - .009); // parker ends at .01, ends at
-                telemetry.addData("->", "Parker position", parker.getPosition() + "");
-                //parkerJuniorElapsedTime.reset();
+                parkerElapsedTime.reset();
             }
-        } else if (parkerMovingIn) {
-            if (parkerjr.getPosition() <= .01) {
-                if (parker.getPosition() >= .69) {
-                    telemetry.addData("<-", "ParkerMovingIn finished.");
-                    parkerMovingIn = false;
-                } else {
-                    parker.setPosition(parker.getPosition() + .009);
-                }
-            } else {
-                parkerjr.setPosition(parker.getPosition() - .029);
-            }
-        }
 
-        telemetry.update();
+            if (parkerMovingOut) {
+                if (parker.getPosition() <= .01) {
+                    if (parkerjr.getPosition() >= .99) {
+                        telemetry.addData("->", "ParkerMovingOut finished.");
+                        parkerMovingOut = false; // parker jr ends at .99
+                    } else {
+                        telemetry.addData("ParkerJR position", parkerjr.getPosition());
+                        parkerjr.setPosition(parkerjr.getPosition() + .029);
+                    }
+                } else {
+                    parker.setPosition(parker.getPosition() - .009); // parker ends at .01, ends at
+                    telemetry.addData("->", "Parker position", parker.getPosition() + "");
+                    //parkerJuniorElapsedTime.reset();
+                }
+            } else if (parkerMovingIn) {
+                if (parkerjr.getPosition() <= .01) {
+                    if (parker.getPosition() >= .69) {
+                        telemetry.addData("<-", "ParkerMovingIn finished.");
+                        parkerMovingIn = false;
+                    } else {
+                        parker.setPosition(parker.getPosition() + .009);
+                    }
+                } else {
+                    parkerjr.setPosition(parker.getPosition() - .029);
+                }
+            }
+
+            telemetry.update();
+            */
 
         /*if (parkerMoving) {
             if (parkerJuniorElapsedTime.time() > 1.5) {
@@ -400,7 +428,7 @@ public class Teleop extends OpMode {
             parkerJuniorElapsedTime.reset();
         }*/
 
+        }
     }
 }
-
 
