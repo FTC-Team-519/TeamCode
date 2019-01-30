@@ -51,6 +51,7 @@ public class Teleop extends OpMode {
     private float gunnerRightStickY;
 
     private boolean flipDriveDirection = false;
+    private boolean resetHorizontalLift = false;
 
     private double parkerCurrentPosition;
     private double parkerPositionIncrement = .01;
@@ -330,92 +331,103 @@ public class Teleop extends OpMode {
             slider.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
 
-        if (sliderMotorPower < 0) {
-            if (gunner.b) {
+        if (gunner.b) {
+            slider.getMotor().setPower(sliderMotorPower);
+        } else if (sliderMotorPower < 0) {
+            if (slider.getMotor().getCurrentPosition() > 0) {
                 slider.getMotor().setPower(sliderMotorPower);
             } else {
-                if (slider.getMotor().getCurrentPosition() < 1270) {
-                    slider.getMotor().setPower(sliderMotorPower);
-                } else {
-                    slider.getMotor().setPower(0);
-                }
+                slider.getMotor().setPower(0);
             }
         } else {
-            if (gunner.b) {
+            if (slider.getMotor().getCurrentPosition() < 3200) {
                 slider.getMotor().setPower(sliderMotorPower);
             } else {
-                if (slider.getMotor().getCurrentPosition() > 0) {
-                    slider.getMotor().setPower(sliderMotorPower);
-                } else {
-                    slider.getMotor().setPower(0);
-                }
+                slider.getMotor().setPower(0);
             }
         }
 
-        if (gunner.y) { //reset horizontal lift back to original position
-            if (slider.getMotor().getCurrentPosition() > 0) {
-                slider.getMotor().setPower(-0.3);
-            } else if (slider.getMotor().getCurrentPosition() < 0) {
-                slider.getMotor().setPower(0.3);
-            }
+        if (gunner.y && !resetHorizontalLift) { //reset horizontal lift back to original position
+           resetHorizontalLift = true;
+        }
 
-            if (gunner.x) { //stall vertical
-                vertical.getMotor().setPower(0.3);
-            }
-    /*
-            if (gunner.x) {
-                // Ensure that it's been held down for a second
-                if (parkerElapsedTime.time() >= 1) {
-                    parkerElapsedTime.reset();
-                    if (parkerjr == null) {
-                        parkerjr = new Servo(hardwareMap, "parkerjr");
-                    }
-
-                    parkerMovingOut = true;
-                    //parker.setPosition(0);
-                    //parkerjr.setPosition(1);
+        if (resetHorizontalLift) {
+            if (gunner.y) {
+                if (slider.getMotor().getCurrentPosition() > 0) {
+                    slider.getMotor().setPower(-0.3);
+                } else if (slider.getMotor().getCurrentPosition() < 0) {
+                    slider.getMotor().setPower(0.3);
                 }
-            } else if (gunner.y) {
-                if (parkerElapsedTime.time() >= 1) {
-                    if (parkerjr == null) {
-                    } else {
-                        parkerMovingIn = true;
-                        parkerElapsedTime.reset();
-                    }
+                else { // currentPosition = 0, do not move
+                    slider.getMotor().setPower(0);
+                }
+            } else {  // y no longer pressed, abort
+                slider.getMotor().setPower(0);
+                resetHorizontalLift = false;
+            }
+        }
+
+        if(slider.getMotor().getCurrentPosition() == 0) {
+            slider.getMotor().setPower(0);
+        }
+        if (gunner.x) { //stall vertical
+            vertical.getMotor().setPower(-0.3);
+        }
+
+
+        if (driver.left_bumper) {
+            // Ensure that it's been held down for a second
+            if (parkerElapsedTime.time() >= 1) {
+                parkerElapsedTime.reset();
+                if (parkerjr == null) {
+                    parkerjr = new Servo(hardwareMap, "parkerjr");
+                }
+
+                parkerMovingOut = true;
+                //parker.setPosition(0);
+                //parkerjr.setPosition(1);
+            }
+        } else if (driver.right_bumper) {
+            if (parkerElapsedTime.time() >= 1) {
+                if (parkerjr == null) {
+                } else {
+                    parkerMovingIn = true;
+                    parkerElapsedTime.reset();
+                }
+            }
+        } else {
+            parkerElapsedTime.reset();
+        }
+
+        if (parkerMovingOut) {
+            if (parker.getPosition() <= .01) {
+                if (parkerjr.getPosition() >= .99) {
+                    telemetry.addData("->", "ParkerMovingOut finished.");
+                    parkerMovingOut = false; // parker jr ends at .99
+                } else {
+                    telemetry.addData("ParkerJR position", parkerjr.getPosition());
+                    parkerjr.setPosition(parkerjr.getPosition() + .029);
                 }
             } else {
-                parkerElapsedTime.reset();
+                parker.setPosition(parker.getPosition() - .009); // parker ends at .01, ends at
+                telemetry.addData("->", "Parker position", parker.getPosition() + "");
+                //parkerJuniorElapsedTime.reset();
             }
-
-            if (parkerMovingOut) {
-                if (parker.getPosition() <= .01) {
-                    if (parkerjr.getPosition() >= .99) {
-                        telemetry.addData("->", "ParkerMovingOut finished.");
-                        parkerMovingOut = false; // parker jr ends at .99
-                    } else {
-                        telemetry.addData("ParkerJR position", parkerjr.getPosition());
-                        parkerjr.setPosition(parkerjr.getPosition() + .029);
-                    }
+        } else if (parkerMovingIn) {
+            if (parkerjr.getPosition() <= .01) {
+                if (parker.getPosition() >= .69) {
+                    telemetry.addData("<-", "ParkerMovingIn finished.");
+                    parkerMovingIn = false;
                 } else {
-                    parker.setPosition(parker.getPosition() - .009); // parker ends at .01, ends at
-                    telemetry.addData("->", "Parker position", parker.getPosition() + "");
-                    //parkerJuniorElapsedTime.reset();
+                    parker.setPosition(parker.getPosition() + .009);
                 }
-            } else if (parkerMovingIn) {
-                if (parkerjr.getPosition() <= .01) {
-                    if (parker.getPosition() >= .69) {
-                        telemetry.addData("<-", "ParkerMovingIn finished.");
-                        parkerMovingIn = false;
-                    } else {
-                        parker.setPosition(parker.getPosition() + .009);
-                    }
-                } else {
-                    parkerjr.setPosition(parker.getPosition() - .029);
-                }
+            } else {
+                parkerjr.setPosition(parker.getPosition() - .029);
             }
+        }
 
-            telemetry.update();
-            */
+        telemetry.update();
+
 
         /*if (parkerMoving) {
             if (parkerJuniorElapsedTime.time() > 1.5) {
@@ -429,8 +441,6 @@ public class Teleop extends OpMode {
         } else {
             parkerJuniorElapsedTime.reset();
         }*/
-
-        }
     }
 }
 

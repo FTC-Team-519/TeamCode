@@ -11,8 +11,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.io.FileOutputStream;
 
-@TeleOp(name = "recordAutonomous", group = "Iterative OpMode")
-public class recordAutonomous extends OpMode {
+@TeleOp(name = "recordAutonomous", group = "Z_Recordings")
+public class RecordAutonomous extends OpMode {
 
     Gamepad driver;
     Gamepad gunner;
@@ -54,11 +54,23 @@ public class recordAutonomous extends OpMode {
 
     private double parkerCurrentPosition;
     private double parkerPositionIncrement = .01;
-    private double leftrightValue = 0.1;
+    private double leftrightValue;
+    private static final double LEFT_RIGHT_INCREMENT = 0.025;
 
     private boolean IS_RECORDING_ENABLED = true; // todo: TURN OFF WHEN WE NEED TO.
     private FileOutputStream outputStream;
     private BlackBox.Recorder recorder;
+
+    private static final String DEFAULT_RECORDING_NAME = "recordedTeleop";
+    private String recordingName;
+
+    public RecordAutonomous() {
+        this(DEFAULT_RECORDING_NAME);
+    }
+
+    public RecordAutonomous(String recordingName) {
+        this.recordingName = recordingName;
+    }
 
     private void updateJoyStickValues() {
         y = driver.left_stick_y;
@@ -125,6 +137,7 @@ public class recordAutonomous extends OpMode {
         parker.setPosition(0.69d);
         marker.setPosition(1);
         //parkerjr.setPosition(0.05d);
+        leftrightValue = 0.5;  // make same as righty/lefty start
     }
 
     @Override
@@ -188,6 +201,7 @@ public class recordAutonomous extends OpMode {
     private ElapsedTime recordTimer = new ElapsedTime();
     private ElapsedTime frameTimer = new ElapsedTime();
 
+
     @Override
     public void loop() {
         // check if orange stick is moved down, if so move it up automatically
@@ -201,6 +215,7 @@ public class recordAutonomous extends OpMode {
         }
 
         telemetry.addData("Recording", wantsToRecord + "");
+        telemetry.addData("SaveFile", recordingName);
         if (IS_RECORDING_ENABLED && wantsToRecord) {
             try {
                 double t = recordTimer.time();
@@ -277,11 +292,17 @@ public class recordAutonomous extends OpMode {
             marker.setPosition(.6);
         }
 
-        if(driver.dpad_left) {
-            lefty.getServo().setPosition(leftrightValue=+leftrightValue);
-        }
-        else if(driver.dpad_right) {
-            righty.getServo().setPosition(leftrightValue=-leftrightValue);
+        if (driver.left_stick_button || driver.dpad_right || driver.dpad_left) {
+            if (driver.left_stick_button) {
+                leftrightValue = 0.5;
+            } else if (driver.dpad_left) {
+                leftrightValue = Math.min(leftrightValue + LEFT_RIGHT_INCREMENT, 1.0);
+            } else if (driver.dpad_right) {
+                leftrightValue = Math.max(leftrightValue - LEFT_RIGHT_INCREMENT, 0.0);
+            }
+
+            lefty.getServo().setPosition(leftrightValue);
+            righty.getServo().setPosition(1.0 - leftrightValue);
         }
 
         if(driver.right_trigger > 0) {
@@ -490,6 +511,69 @@ public class recordAutonomous extends OpMode {
             parkerJuniorElapsedTime.reset();
         }*/
 
+        }
+    }
+
+    @TeleOp(name = "RecordCraterBlockLeft", group = "Z_Recordings")
+    public static class RecordCraterBlockLeft extends RecordAutonomous {
+        public RecordCraterBlockLeft() {
+            super("craterBlockLeft");
+        }
+    }
+
+    @TeleOp(name = "RecordCraterBlockCenter", group = "Z_Recordings")
+    public static class RecordCraterBlockCenter extends RecordAutonomous {
+        public RecordCraterBlockCenter() {
+            super("craterBlockCenter");
+        }
+    }
+
+    @TeleOp(name = "RecordCraterBlockRight", group = "Z_Recordings")
+    public static class RecordCraterBlockRight extends RecordAutonomous {
+        public RecordCraterBlockRight() {
+            super("craterBlockRight");
+        }
+    }
+
+    @TeleOp(name = "RecordDepotBlockLeft", group = "Z_Recordings")
+    public static class RecordDepotBlockLeft extends RecordAutonomous {
+        public RecordDepotBlockLeft() {
+            super("depotBlockLeft");
+        }
+    }
+
+    @TeleOp(name = "RecordDepotBlockCenter", group = "Z_Recordings")
+    public static class RecordDepotBlockCenter extends RecordAutonomous {
+        public RecordDepotBlockCenter() {
+            super("depotBlockCenter");
+        }
+    }
+
+    @TeleOp(name = "RecordDepotBlockRight", group = "Z_Recordings")
+    public static class RecordDepotBlockRight extends RecordAutonomous {
+        public RecordDepotBlockRight() {
+            super("depotBlockRight");
+        }
+    }
+
+    @TeleOp(name = "RecordCraterBlockLeftThenDepot", group = "Z_Recordings")
+    public static class RecordCraterBlockLeftThenDepot extends RecordAutonomous {
+        public RecordCraterBlockLeftThenDepot() {
+            super("craterBlockLeftThenDepot");
+        }
+    }
+
+    @TeleOp(name = "RecordCraterBlockCenterThenDepot", group = "Z_Recordings")
+    public static class RecordCraterBlockCenterThenDepot extends RecordAutonomous {
+        public RecordCraterBlockCenterThenDepot() {
+            super("craterBlockCenterThenDepot");
+        }
+    }
+
+    @TeleOp(name = "RecordCraterBlockRightThenDepot", group = "Z_Recordings")
+    public static class RecordCraterBlockRightThenDepot extends RecordAutonomous {
+        public RecordCraterBlockRightThenDepot() {
+            super("craterBlockRightThenDepot");
         }
     }
 }
