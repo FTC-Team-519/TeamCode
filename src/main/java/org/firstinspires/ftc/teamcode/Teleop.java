@@ -105,7 +105,7 @@ public class Teleop extends OpMode {
     }
 
     public float getSliderMotorPower() {
-        float newY = gunnerLeftStickY;
+        float newY = shapeInput(gunnerLeftStickY);
 
         telemetry.addData("Slider Motor Y Orig Value", newY + "");
         if (newY < 0) {
@@ -293,7 +293,9 @@ public class Teleop extends OpMode {
 
         telemetry.addData("Vertical Encoder Value", vertical.getMotor().getCurrentPosition());
         float verticalMotorPower = getVerticalMotorPower();
-        if (verticalMotorPower > 0) {
+        if (gunner.b) {
+            vertical.getMotor().setPower(verticalMotorPower);
+        } else if (verticalMotorPower > 0) {
             if (vertical.getMotor().getCurrentPosition() > -5) {
                 vertical.getMotor().setPower(0);
             } else {
@@ -302,6 +304,7 @@ public class Teleop extends OpMode {
         } else {
             vertical.getMotor().setPower(verticalMotorPower);
         }
+
 
         if (gunner.right_bumper || gunner.right_trigger > 0) {
             scorer.getServo().setPosition(1.0);
@@ -329,6 +332,9 @@ public class Teleop extends OpMode {
         if (gunner.a) {
             slider.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             slider.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+            vertical.getMotor().setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            vertical.getMotor().setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
 
         if (gunner.b) {

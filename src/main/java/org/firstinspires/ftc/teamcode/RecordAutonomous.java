@@ -85,9 +85,9 @@ public class RecordAutonomous extends OpMode {
         gunnerLeftStickY = -gunner.left_stick_y;  // NOTE: Switch if spools inverted
         gunnerRightStickY = gunner.right_stick_y;
 
-        y = shapeInput(y);
-        x = shapeInput(x);
-        z = shapeInput(z);
+        y = 0.5f * shapeInput(y);
+        x = 0.5f * shapeInput(x);
+        z = 0.5f * shapeInput(z);
     }
 
     private static float shapeInput(float input) {
@@ -223,6 +223,11 @@ public class RecordAutonomous extends OpMode {
                 recorder.recordDevice("motor2", t);
                 recorder.recordDevice("motor3", t);
                 recorder.recordDevice("motor4", t);
+                recorder.recordDevice("marker", t);
+                recorder.recordDevice("parker", t);
+                recorder.recordDevice("parkerjr", t);
+                recorder.recordDevice("lefty", t);
+                recorder.recordDevice("righty", t);
                 telemetry.addData("Recording time", t + "");
             } catch (Exception e) {
                 e.printStackTrace();
