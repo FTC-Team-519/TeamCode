@@ -27,7 +27,7 @@ public class Teleop extends OpMode {
     private Servo scorer;
 
     private boolean parkerMovingOut = false;
-    private boolean parkerMovingIn = false;
+    private boolean parkerMovingIn = true;
 
     private Motor slider;
     private Motor climber;
@@ -182,7 +182,7 @@ public class Teleop extends OpMode {
                 requestOpModeStop();
             }
         }
-        //parkerjr = new Servo(hardwareMap, "parkerjr");
+        parkerjr = new Servo(hardwareMap, "parkerjr");
     }
 
     private boolean wantsToRecord = false;
@@ -306,15 +306,33 @@ public class Teleop extends OpMode {
         }
 
 
-        if (gunner.right_bumper || gunner.right_trigger > 0) {
+        /*if (gunner.right_bumper || gunner.right_trigger > 0) {
             scorer.getServo().setPosition(1.0);
         } else if (gunner.left_bumper || gunner.left_trigger > 0) {
             scorer.getServo().setPosition(0.0);
         } else {
             scorer.getServo().setPosition(0.5);
+        }*/
+
+
+        if (gunner.right_trigger > 0 && gunner.right_bumper) {
+            collector.getMotor().setPower(-1.0);
+        } else if (gunner.left_trigger > 0 && gunner.left_bumper) {
+            collector.getMotor().setPower(1.0);
+        } else if (gunner.left_trigger > 0 || gunner.left_bumper) {
+            collector.getMotor().setPower(.6);
+        } else if (gunner.right_bumper || gunner.right_trigger > 0) {
+            collector.getMotor().setPower(-.6);
+        } else {
+            collector.getMotor().setPower(0);
         }
 
-        if (gunner.dpad_up) {
+        if (gunner.dpad_up || gunner.dpad_down || gunner.dpad_right || gunner.dpad_left) {
+            scorer.getServo().setPosition(1.0);
+        } else {
+            scorer.getServo().setPosition(.5);
+        }
+        /*if (gunner.dpad_up) {
             collector.getMotor().setPower(0.9);
         } else if (gunner.dpad_down) {
             collector.getMotor().setPower(-0.9);
@@ -324,7 +342,7 @@ public class Teleop extends OpMode {
             collector.getMotor().setPower(0.6);
         } else {
             collector.getMotor().setPower(0.0);
-        }
+        }*/
 
         float sliderMotorPower = getSliderMotorPower();
         telemetry.addData("Slider Motor Power After Done", sliderMotorPower + "");

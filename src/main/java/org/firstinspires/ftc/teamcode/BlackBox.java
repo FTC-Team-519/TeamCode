@@ -90,11 +90,12 @@ public class BlackBox {
                 HardwareDevice device = hardware.get(p.varname);
                 if (device != null) {
                     if (device instanceof DcMotor) {
-                        if (p.varname.equals("motor2") || p.varname.equals("motor4")) {
+                       /* if (p.varname.equals("motor2") || p.varname.equals("motor4")) {
                             ((DcMotor)device).setPower(-p.value);
                         } else {
                             ((DcMotor)device).setPower(p.value);
-                        }
+                         }*/
+                        ((DcMotor)device).setPower(p.value);
                     }
                     if (device instanceof Servo) {
                         ((Servo)device).setPosition(p.value);

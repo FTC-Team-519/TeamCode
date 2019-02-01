@@ -104,7 +104,7 @@ public class AutonomousJustOffHook extends OpMode {
             case 5:
 
                 if (elapsedTime.time() < 0.5) { //.75 usually  // was 0.7
-                    motorUtil.strafeLeft(.7); //.6
+                    motorUtil.strafeLeft(.6); //.6
                 } else {
                     //stepCounter.increment();  FIXME: Only Strafe off hook
                     stepCounter.set(10);  // Go to done
@@ -233,6 +233,7 @@ public class AutonomousJustOffHook extends OpMode {
                 marker.setPosition(.6);
                 break;
             case 10:
+                motorUtil.stopMoving();
                 // DONE
                 break;
             default:

@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.content.Context;
+import android.media.audiofx.EnvironmentalReverb;
+import android.os.Environment;
 
+import com.qualcomm.robotcore.eventloop.EventLoop;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import java.io.File;
 import java.io.FileOutputStream;
 
 @TeleOp(name = "recordAutonomous", group = "Z_Recordings")
@@ -85,9 +89,9 @@ public class RecordAutonomous extends OpMode {
         gunnerLeftStickY = -gunner.left_stick_y;  // NOTE: Switch if spools inverted
         gunnerRightStickY = gunner.right_stick_y;
 
-        y = 0.5f * shapeInput(y);
-        x = 0.5f * shapeInput(x);
-        z = 0.5f * shapeInput(z);
+        y = 0.6f * shapeInput(y);
+        x = 0.6f * shapeInput(x);
+        z = 0.6f * shapeInput(z);
     }
 
     private static float shapeInput(float input) {
@@ -145,8 +149,10 @@ public class RecordAutonomous extends OpMode {
         super.stop();
         try {
             outputStream.close();
+            telemetry.addData("Closed", ".");
         } catch (Exception e) {
             e.printStackTrace();
+            telemetry.addData("Couldn't close the output stream", ".");
         }
     }
 
@@ -185,8 +191,10 @@ public class RecordAutonomous extends OpMode {
             // Attempt to initialize
             try {
                 // Open a file named "recordedTeleop" in the app's folder.
-                outputStream = hardwareMap.appContext.openFileOutput("recordedTeleop",
+                outputStream = hardwareMap.appContext.openFileOutput(recordingName,
                         Context.MODE_PRIVATE);
+                //File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+                //outputStream = new FileOutputStream(new File(path, recordingName));
                 // Setup a hardware recorder.
                 recorder = new BlackBox.Recorder(hardwareMap, outputStream);
             } catch (Exception e) {
@@ -332,6 +340,14 @@ public class RecordAutonomous extends OpMode {
             }
         } else {
             parkerElapsedTime.reset();
+        }
+
+        if (driver.left_bumper) {
+            if (parker.getPosition() <= .01) {
+
+            } else {
+                parker.setPosition(parker.getPosition() - .009); // parker ends at .01, ends at
+            }
         }
 
         if (parkerMovingOut) {
