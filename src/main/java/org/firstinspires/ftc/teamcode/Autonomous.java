@@ -123,7 +123,7 @@ public class Autonomous extends OpMode {
                 break;
             case 7:
                 GoldBlockPosition position = vuforia.getGoldBlockPosition();
-                if (position == GoldBlockPosition.LEFT) {
+                if (position == GoldBlockPosition.Left) {
                     //start strafing
                     if (elapsedTime.time() > .5) {
                         if (elapsedTime.time() > 3.1) {
@@ -146,7 +146,7 @@ public class Autonomous extends OpMode {
                     } else {
                         motorUtil.turnLeft(.6, true);
                     }
-                } else if (position == GoldBlockPosition.RIGHT) {
+                } else if (position == GoldBlockPosition.Right) {
                     //start strafing
                     if (elapsedTime.time() > .68) { //.625+.15
                         if (elapsedTime.time() > 3) { // was 3.5

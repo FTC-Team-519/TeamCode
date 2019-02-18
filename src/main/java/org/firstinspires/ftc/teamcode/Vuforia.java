@@ -173,13 +173,13 @@ class GoldSample extends Thread {
 
         if (Math.abs(yellowHalfOne - yellowHalfTwo) < 100) {
             telemetry.addData("Block Found", "Off Screen (left) - negligible difference of " + Math.abs(yellowHalfOne-yellowHalfTwo));
-            position = GoldBlockPosition.LEFT;
+            position = GoldBlockPosition.Left;
         } else if (yellowHalfOne > yellowHalfTwo) {
             telemetry.addData("Block Found", "Center");
-            position = GoldBlockPosition.CENTER;
+            position = GoldBlockPosition.Center;
         } else {
             telemetry.addData("Block Found", "Right");
-            position = GoldBlockPosition.RIGHT;
+            position = GoldBlockPosition.Right;
         }
 
         telemetry.addData("Pixel Analysis", "Done");

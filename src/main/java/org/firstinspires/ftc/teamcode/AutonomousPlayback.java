@@ -115,6 +115,7 @@ public class AutonomousPlayback extends OpMode {
                     motorUtil.strafeLeft(.6); //.6
                 } else {
                     stepCounter.increment();
+                    motorUtil.stopMoving();
                 }
                 break;
             case 6:

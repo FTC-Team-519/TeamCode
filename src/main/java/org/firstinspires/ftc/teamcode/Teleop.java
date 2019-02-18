@@ -57,7 +57,7 @@ public class Teleop extends OpMode {
     private double parkerPositionIncrement = .01;
     private double scorerValue = 0.1;
 
-    private boolean IS_RECORDING_ENABLED = true; // todo: TURN OFF WHEN WE NEED TO.
+    private boolean IS_RECORDING_ENABLED = false; // todo: TURN OFF WHEN WE NEED TO.
     private FileOutputStream outputStream;
     private BlackBox.Recorder recorder;
 
@@ -123,7 +123,7 @@ public class Teleop extends OpMode {
         righty.setPosition(0.5);
         lefty.setPosition(0.5);
         marker.setPosition(0.5);
-        parker.setPosition(0.69d);
+        //parker.setPosition(0.69d);
         marker.setPosition(1);
         //parkerjr.setPosition(0.05d);
     }
@@ -408,8 +408,8 @@ public class Teleop extends OpMode {
                 }
 
                 parkerMovingOut = true;
-                //parker.setPosition(0);
-                //parkerjr.setPosition(1);
+                parker.setPosition(0);
+                parkerjr.setPosition(1);
             }
         } else if (driver.right_bumper) {
             if (parkerElapsedTime.time() >= 1) {

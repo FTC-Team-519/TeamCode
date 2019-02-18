@@ -120,7 +120,7 @@ public class AutonomousCrater extends OpMode {
                 break;
             case 7:
                 GoldBlockPosition position = vuforia.getGoldBlockPosition();
-                if (position == GoldBlockPosition.LEFT) {
+                if (position == GoldBlockPosition.Left) {
                     //start strafing
 
 
@@ -142,7 +142,7 @@ public class AutonomousCrater extends OpMode {
                     } else {
                         motorUtil.turnLeft(.5, true);
                     }
-                } else if (position == GoldBlockPosition.RIGHT) {
+                } else if (position == GoldBlockPosition.Right) {
                     //start strafing
 
                     if (elapsedTime.time() > 1.0) {
