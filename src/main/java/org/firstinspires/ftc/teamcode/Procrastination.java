@@ -61,10 +61,10 @@ public class Procrastination extends OpMode {
         }
 
         if (gamepad1.dpad_left && !desiredMaxShootingPowerAdjusted) {
-            desiredMaxShootingPower = Math.max(0.0d, desiredMaxShootingPower - 0.05d);
+            desiredMaxShootingPower = Math.max(0.0d, desiredMaxShootingPower - 0.01d);
             desiredMaxShootingPowerAdjusted = true;
         } else if (gamepad1.dpad_right && !desiredMaxShootingPowerAdjusted) {
-            desiredMaxShootingPower = Math.min(1.0d, desiredMaxShootingPower + 0.05d);
+            desiredMaxShootingPower = Math.min(1.0d, desiredMaxShootingPower + 0.01d);
             desiredMaxShootingPowerAdjusted = true;
         } else if (!gamepad1.dpad_left && !gamepad1.dpad_right){
             desiredMaxShootingPowerAdjusted = false;
